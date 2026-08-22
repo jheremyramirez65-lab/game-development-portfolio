@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>♻️ Recicle & Launch 🎯</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+    user-select: none;
+  }
+
+  body {
+    background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 40%, #A5D6A7 100%);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #game-container {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    height: 100vh;
+    max-height: 900px;
+    background: linear-gradient(180deg, #87CEEB 0%, #B2EBF2 35%, #C8E6C9 70%, #A5D6A7 100%);
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0,0,0,0.15);
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  #ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .hud {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .stat {
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(8px);
+    border-radius: 14px;
+    padding: 8px 14px;
+    font-weight: 700;
+    font-size: 15px;
+    color: #1B5E20;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat.lives { color: #C62828; }
+  .stat.streak { color: #E65100; }
+  .stat.timer { color: #1565C0; }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 20;
+    pointer-events: auto;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .screen.hidden { display: none; }
+
+  .logo {
+    font-size: 42px;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 28px;
+    color: #1B5E20;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: #388E3C;
+    margin-bottom: 20px;
+    max-width: 320px;
+    line-height: 1.4;
+  }
+
+  .bins-preview {
+    display: flex;
+    gap: 16px;
+    margin: 16px 0 24px;
+  }
+
+  .bin-preview {
+    width: 70px;
+    height: 80px;
+    border-radius: 12px 12px 8px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  }
+
+  .bin-preview.organic { background: linear-gradient(180deg, #66BB6A, #2E7D32); }
+  .bin-preview.plastic { background: linear-gradient(180deg, #42A5F5, #1565C0); }
+  .bin-preview.paper   { background: linear-gradient(180deg, #FFA726, #EF6C00); }
+
+  .bin-preview span { font-size: 28px; margin-bottom: 4px; }
+
+  .rules {
+    background: #E8F5E9;
+    border-radius: 16px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: #2E7D32;
+    text-align: left;
+    max-width: 340px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .rules strong { color: #1B5E20; }
+
+  .btn {
+    background: linear-gradient(180deg, #66BB6A, #2E7D32);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 16px 48px;
+    font-size: 20px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(46,125,50,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+    pointer-events: auto;
+  }
+
+  .btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+  }
+
+  .btn.secondary {
+    background: linear-gradient(180deg, #90A4AE, #546E7A);
+    margin-top: 12px;
+    padding: 12px 36px;
+    font-size: 16px;
+  }
+
+  .result-title {
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+
+  .result-stats {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0 28px;
+  }
+
+  .result-stat {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  }
+
+  .result-stat .value {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1B5E20;
+  }
+
+  .result-stat .label {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <canvas id="game"></canvas>
+
+  <div id="ui">
+    <div class="hud">
+      <div class="stat">⭐ <span id="score">0</span></div>
+      <div class="stat lives">❤️ <span id="lives">3</span></div>
+      <div class="stat streak">🔥 <span id="streak">0</span></div>
+      <div class="stat timer">⏱️ <span id="timer">60</span>s</div>
+    </div>
+  </div>
+
+  <div id="start-screen" class="screen">
+    <div class="logo">♻️</div>
+    <h1>Recicle & Launch</h1>
+    <p class="subtitle">¡Ayuda al planeta! Arrastra cada residuo desde el lanzador hacia abajo y suéltalo apuntando al basurero correcto. ¡Clasifica rápido y con puntería!</p>
+
+    <div class="bins-preview">
+      <div class="bin-preview organic"><span>🍃</span>Orgánico</div>
+      <div class="bin-preview plastic"><span>♻️</span>Plástico</div>
+      <div class="bin-preview paper"><span>📄</span>Papel</div>
+    </div>
+
+    <div class="rules">
+      ✅ <strong>Acierto:</strong> +10 pts<br>
+      ❌ <strong>Error:</strong> -5 pts y -1 vida<br>
+      🔥 <strong>5 aciertos seguidos:</strong> +1 vida<br>
+      🏆 <strong>Meta:</strong> 12 aciertos antes de que acabe el tiempo<br>
+      🚧 <strong>Barreras:</strong> evítalas o rebota
+    </div>
+
+    <button class="btn" id="start-btn">▶ ¡Jugar!</button>
+    <p style="margin-top:16px;font-size:12px;color:#666;">Arrastra hacia abajo con el mouse o el dedo · Diseñado para aprender reciclando</p>
+  </div>
+
+  <div id="end-screen" class="screen hidden">
+    <div class="result-title" id="end-title">🏆 ¡Lo lograste!</div>
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="value" id="final-score">0</div>
+        <div class="label">Puntos</div>
+      </div>
+      <div class="result-stat">
+        <div class="value" id="final-hits">0</div>
+        <div class="label">Aciertos</div>
+      </div>
+      <div class="result-stat">
+        <div class="value" id="final-streak">0</div>
+        <div class="label">Mejor racha</div>
+      </div>
+    </div>
+    <button class="btn" id="restart-btn">🔄 Jugar de nuevo</button>
+    <button class="btn secondary" id="menu-btn">🏠 Menú</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const container = document.getElementById('game-container');
+
+  const scoreEl = document.getElementById('score');
+  const livesEl = document.getElementById('lives');
+  const streakEl = document.getElementById('streak');
+  const timerEl = document.getElementById('timer');
+  const startScreen = document.getElementById('start-screen');
+  const endScreen = document.getElementById('end-screen');
+  const endTitle = document.getElementById('end-title');
+  const finalScore = document.getElementById('final-score');
+  const finalHits = document.getElementById('final-hits');
+  const finalStreak = document.getElementById('final-streak');
+
+  let W, H, scale;
+  let score = 0, lives = 3, streak = 0, maxStreak = 0, hits = 0;
+  let timeLeft = 60;
+  let running = false;
+  let lastTime = 0;
+  let particles = [];
+  let feedbacks = [];
+
+  const GRAVITY = 0.45;
+  const FRICTION = 0.995;
+
+  const BIN_TYPES = [
+    { id: 'organic', name: 'Orgánico', emoji: '🍃', color: '#2E7D32', colorTop: '#66BB6A' },
+    { id: 'plastic', name: 'Plástico', emoji: '♻️', color: '#1565C0', colorTop: '#42A5F5' },
+    { id: 'paper',   name: 'Papel',    emoji: '📄', color: '#EF6C00', colorTop: '#FFA726' }
+  ];
+
+  const MATERIAL_NAMES = {
+    organic: 'Orgánico',
+    plastic: 'Plástico',
+    paper: 'Papel'
+  };
+
+  const WASTE = [
+    { type: 'organic', emoji: '🍌', name: 'Cáscara de plátano' },
+    { type: 'organic', emoji: '🍎', name: 'Manzana' },
+    { type: 'organic', emoji: '🥕', name: 'Zanahoria' },
+    { type: 'organic', emoji: '🍃', name: 'Hojas' },
+    { type: 'plastic', emoji: '🧴', name: 'Botella de plástico' },
+    { type: 'plastic', emoji: '🥤', name: 'Vaso de plástico' },
+    { type: 'plastic', emoji: '🛍️', name: 'Bolsa de plástico' },
+    { type: 'plastic', emoji: '📦', name: 'Envase de plástico' },
+    { type: 'paper',   emoji: '📰', name: 'Periódico' },
+    { type: 'paper',   emoji: '📄', name: 'Hoja de papel' },
+    { type: 'paper',   emoji: '📦', name: 'Caja de cartón' },
+    { type: 'paper',   emoji: '🧾', name: 'Ticket / recibo' }
+  ];
+
+  let bins = [];
+  let barriers = [];
+  let currentWaste = null;
+  let projectile = null;
+  let isDragging = false;
+  let dragStart = null;
+  let dragCurrent = null;
+
+  let launcher = { x: 0, y: 0, radius: 38 };
+
+  function resize() {
+    const rect = container.getBoundingClientRect();
+    W = rect.width;
+    H = rect.height;
+    scale = Math.min(W / 400, H / 700);
+    canvas.width = W * devicePixelRatio;
+    canvas.height = H * devicePixelRatio;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+
+    const binW = 90 * scale;
+    const binH = 100 * scale;
+    const gap = (W - binW * 3) / 4;
+    bins = BIN_TYPES.map((t, i) => ({
+      ...t,
+      x: gap + i * (binW + gap) + binW / 2,
+      y: 110 * scale + binH / 2,
+      w: binW,
+      h: binH
+    }));
+
+    launcher.x = W / 2;
+    launcher.y = H - 145 * scale;
+    launcher.radius = 38 * scale;
+
+    // Barreras simples (2-3) que bloquean el camino directo
+    const midY = H * 0.48;
+    barriers = [
+      // Barrera izquierda (bloquea un poco el orgánico)
+      { x: W * 0.22, y: midY - 30 * scale, w: 70 * scale, h: 18 * scale, vx: 0.6 },
+      // Barrera central (la más molesta)
+      { x: W * 0.50, y: midY + 25 * scale, w: 95 * scale, h: 18 * scale, vx: -0.45 },
+      // Barrera derecha
+      { x: W * 0.78, y: midY - 10 * scale, w: 65 * scale, h: 18 * scale, vx: 0.55 }
+    ];
+  }
+
+  function spawnWaste() {
+    const item = WASTE[Math.floor(Math.random() * WASTE.length)];
+    currentWaste = {
+      ...item,
+      x: launcher.x,
+      y: launcher.y - 10,
+      radius: 28 * scale,
+      vx: 0,
+      vy: 0,
+      rotation: 0,
+      rotSpeed: 0
+    };
+    projectile = null;
+  }
+
+  function startGame() {
+    score = 0; lives = 3; streak = 0; maxStreak = 0; hits = 0;
+    timeLeft = 60;
+    running = true;
+    particles = [];
+    feedbacks = [];
+    updateHUD();
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    spawnWaste();
+    lastTime = performance.now();
+    requestAnimationFrame(loop);
+  }
+
+  function endGame(won) {
+    running = false;
+    endTitle.textContent = won ? '🏆 ¡Lo lograste!' : '🌱 ¡Sigue intentando!';
+    finalScore.textContent = score;
+    finalHits.textContent = hits;
+    finalStreak.textContent = maxStreak;
+    endScreen.classList.remove('hidden');
+  }
+
+  function updateHUD() {
+    scoreEl.textContent = score;
+    livesEl.textContent = lives;
+    streakEl.textContent = streak;
+    timerEl.textContent = Math.ceil(timeLeft);
+  }
+
+  function addFeedback(x, y, text, color) {
+    feedbacks.push({ x, y, text, color, life: 1 });
+  }
+
+  function spawnParticles(x, y, color, count = 12) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 2 + Math.random() * 5;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 2,
+        life: 1,
+        color,
+        size: 3 + Math.random() * 4
+      });
+    }
+  }
+
+  function checkBarrierCollision(p) {
+    for (const b of barriers) {
+      const closestX = Math.max(b.x - b.w / 2, Math.min(p.x, b.x + b.w / 2));
+      const closestY = Math.max(b.y - b.h / 2, Math.min(p.y, b.y + b.h / 2));
+      const dx = p.x - closestX;
+      const dy = p.y - closestY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < p.radius) {
+        // Rebote simple
+        if (Math.abs(dx) > Math.abs(dy)) {
+          p.vx *= -0.75;
+          p.x += dx > 0 ? (p.radius - dist) : -(p.radius - dist);
+        } else {
+          p.vy *= -0.75;
+          p.y += dy > 0 ? (p.radius - dist) : -(p.radius - dist);
+        }
+        p.rotSpeed = (Math.random() - 0.5) * 0.4;
+        spawnParticles(closestX, closestY, '#8D6E63', 6);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function checkHit() {
+    if (!projectile) return;
+    const p = projectile;
+
+    checkBarrierCollision(p);
+
+    for (const bin of bins) {
+      const dx = p.x - bin.x;
+      const dy = p.y - (bin.y - bin.h * 0.15);
+      if (Math.abs(dx) < bin.w * 0.48 && Math.abs(dy) < bin.h * 0.35) {
+        if (p.type === bin.id) {
+          score += 10;
+          hits++;
+          streak++;
+          if (streak > maxStreak) maxStreak = streak;
+          if (streak > 0 && streak % 5 === 0) {
+            lives++;
+            addFeedback(bin.x, bin.y - 40, '+1 ❤️', '#C62828');
+          }
+          addFeedback(bin.x, bin.y - 20, '+10', '#2E7D32');
+          spawnParticles(bin.x, bin.y - 10, bin.colorTop, 18);
+        } else {
+          score = Math.max(0, score - 5);
+          lives--;
+          streak = 0;
+          addFeedback(bin.x, bin.y - 20, '-5', '#C62828');
+          spawnParticles(bin.x, bin.y - 10, '#EF5350', 10);
+        }
+        updateHUD();
+        projectile = null;
+        if (lives <= 0) {
+          endGame(false);
+          return;
+        }
+        if (hits >= 12) {
+          endGame(true);
+          return;
+        }
+        setTimeout(spawnWaste, 350);
+        return;
+      }
+    }
+
+    if (p.y > H + 50 || p.x < -50 || p.x > W + 50) {
+      score = Math.max(0, score - 5);
+      lives--;
+      streak = 0;
+      addFeedback(p.x, H - 80, '¡Fallaste!', '#C62828');
+      updateHUD();
+      projectile = null;
+      if (lives <= 0) {
+        endGame(false);
+        return;
+      }
+      setTimeout(spawnWaste, 400);
+    }
+  }
+
+  function updateBarriers(dt) {
+    for (const b of barriers) {
+      b.x += b.vx * dt;
+      // Rebotar en los bordes laterales
+      if (b.x - b.w / 2 < 10 || b.x + b.w / 2 > W - 10) {
+        b.vx *= -1;
+      }
+    }
+  }
+
+  function drawBin(bin) {
+    const { x, y, w, h, color, colorTop, emoji, name } = bin;
+    const topY = y - h / 2;
+    const bottomY = y + h / 2;
+
+    ctx.save();
+    ctx.globalAlpha = 0.95;
+
+    const grad = ctx.createLinearGradient(x, topY, x, bottomY);
+    grad.addColorStop(0, colorTop);
+    grad.addColorStop(1, color);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(x - w / 2, topY + 18, w, h - 18, 10);
+    ctx.fill();
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(x - w / 2 - 4, topY + 12, w + 8, 16, 6);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.roundRect(x - w / 2 + 6, topY + 20, w - 12, 14, 4);
+    ctx.fill();
+
+    ctx.restore();
+
+    ctx.font = `${Math.floor(28 * scale)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, x, y - 8);
+
+    ctx.font = `bold ${Math.floor(13 * scale)}px system-ui`;
+    ctx.fillStyle = 'white';
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur = 3;
+    ctx.fillText(name, x, bottomY - 14);
+    ctx.shadowBlur = 0;
+  }
+
+  function drawBarriers() {
+    for (const b of barriers) {
+      // Sombra
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.beginPath();
+      ctx.roundRect(b.x - b.w / 2 + 3, b.y - b.h / 2 + 4, b.w, b.h, 6);
+      ctx.fill();
+
+      // Cuerpo
+      const grad = ctx.createLinearGradient(b.x, b.y - b.h / 2, b.x, b.y + b.h / 2);
+      grad.addColorStop(0, '#A1887F');
+      grad.addColorStop(1, '#5D4037');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(b.x - b.w / 2, b.y - b.h / 2, b.w, b.h, 6);
+      ctx.fill();
+
+      // Borde
+      ctx.strokeStyle = '#3E2723';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Detalle (líneas)
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(b.x - b.w / 2 + 8, b.y);
+      ctx.lineTo(b.x + b.w / 2 - 8, b.y);
+      ctx.stroke();
+    }
+  }
+
+  function drawLauncher() {
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.beginPath();
+    ctx.ellipse(launcher.x, launcher.y + 18, 55 * scale, 14 * scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(launcher.x, launcher.y, launcher.radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fill();
+    ctx.strokeStyle = '#4CAF50';
+    ctx.lineWidth = 4 * scale;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(launcher.x, launcher.y, launcher.radius - 10 * scale, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(76,175,80,0.4)';
+    ctx.lineWidth = 2 * scale;
+    ctx.stroke();
+  }
+
+  function drawItemLabel() {
+    if (!currentWaste || projectile) return;
+
+    const name = currentWaste.name;
+    const material = MATERIAL_NAMES[currentWaste.type];
+    const labelY = launcher.y - launcher.radius - 55 * scale;
+
+    ctx.font = `bold ${Math.floor(15 * scale)}px system-ui`;
+    const nameWidth = ctx.measureText(name).width;
+    ctx.font = `${Math.floor(13 * scale)}px system-ui`;
+    const matWidth = ctx.measureText(material).width;
+    const boxW = Math.max(nameWidth, matWidth) + 28 * scale;
+    const boxH = 48 * scale;
+
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.strokeStyle = 'rgba(46,125,50,0.35)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(launcher.x - boxW / 2, labelY - boxH / 2, boxW, boxH, 12);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = `bold ${Math.floor(15 * scale)}px system-ui`;
+    ctx.fillStyle = '#1B5E20';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name, launcher.x, labelY - 9 * scale);
+
+    ctx.font = `${Math.floor(13 * scale)}px system-ui`;
+    ctx.fillStyle = '#388E3C';
+    ctx.fillText(material, launcher.x, labelY + 11 * scale);
+  }
+
+  function drawWaste(item) {
+    ctx.save();
+    ctx.translate(item.x, item.y);
+    ctx.rotate(item.rotation || 0);
+
+    ctx.beginPath();
+    ctx.arc(3, 5, item.radius * 0.9, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, item.radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.strokeStyle = '#E0E0E0';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.font = `${Math.floor(item.radius * 1.3)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.emoji, 0, 2);
+
+    ctx.restore();
+  }
+
+  function drawAimLine() {
+    if (!isDragging || !dragStart || !dragCurrent || !currentWaste) return;
+
+    const dx = dragStart.x - dragCurrent.x;
+    const dy = dragStart.y - dragCurrent.y;
+    const power = Math.min(Math.hypot(dx, dy), 180 * scale);
+    if (power < 8) return;
+
+    const angle = Math.atan2(dy, dx);
+
+    ctx.save();
+    ctx.setLineDash([6, 8]);
+    ctx.strokeStyle = 'rgba(46,125,50,0.55)';
+    ctx.lineWidth = 2.5 * scale;
+    ctx.beginPath();
+
+    let x = currentWaste.x;
+    let y = currentWaste.y;
+    let vx = Math.cos(angle) * (power * 0.22);
+    let vy = Math.sin(angle) * (power * 0.22);
+
+    ctx.moveTo(x, y);
+    for (let i = 0; i < 40; i++) {
+      x += vx;
+      y += vy;
+      vy += GRAVITY * 0.9;
+      vx *= 0.998;
+      if (y > H || x < 0 || x > W) break;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    const powerPct = power / (180 * scale);
+    ctx.beginPath();
+    ctx.arc(launcher.x, launcher.y, launcher.radius + 8 + powerPct * 12, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(76,175,80,${0.3 + powerPct * 0.5})`;
+    ctx.lineWidth = 3 * scale;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function drawParticles() {
+    for (const p of particles) {
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawFeedbacks() {
+    for (const f of feedbacks) {
+      ctx.globalAlpha = f.life;
+      ctx.font = `bold ${Math.floor(22 * scale)}px system-ui`;
+      ctx.fillStyle = f.color;
+      ctx.textAlign = 'center';
+      ctx.fillText(f.text, f.x, f.y);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function loop(now) {
+    if (!running) return;
+    const dt = Math.min((now - lastTime) / 16.67, 2.5);
+    lastTime = now;
+
+    timeLeft -= dt / 60;
+    if (timeLeft <= 0) {
+      timeLeft = 0;
+      endGame(hits >= 12);
+      return;
+    }
+    updateHUD();
+
+    updateBarriers(dt);
+
+    if (projectile) {
+      projectile.vy += GRAVITY * dt;
+      projectile.vx *= FRICTION;
+      projectile.x += projectile.vx * dt;
+      projectile.y += projectile.vy * dt;
+      projectile.rotation += projectile.rotSpeed * dt;
+      checkHit();
+    }
+
+    particles = particles.filter(p => {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 0.15 * dt;
+      p.life -= 0.025 * dt;
+      return p.life > 0;
+    });
+
+    feedbacks = feedbacks.filter(f => {
+      f.y -= 1.2 * dt;
+      f.life -= 0.03 * dt;
+      return f.life > 0;
+    });
+
+    ctx.clearRect(0, 0, W, H);
+
+    const groundGrad = ctx.createLinearGradient(0, H - 180, 0, H);
+    groundGrad.addColorStop(0, 'rgba(165,214,167,0)');
+    groundGrad.addColorStop(1, 'rgba(76,175,80,0.25)');
+    ctx.fillStyle = groundGrad;
+    ctx.fillRect(0, H - 180, W, 180);
+
+    bins.forEach(drawBin);
+    drawBarriers();
+    drawLauncher();
+    drawItemLabel();
+    drawAimLine();
+
+    if (projectile) {
+      drawWaste(projectile);
+    } else if (currentWaste) {
+      if (isDragging && dragCurrent) {
+        currentWaste.x = dragCurrent.x;
+        currentWaste.y = Math.min(dragCurrent.y, launcher.y + 55 * scale);
+      } else {
+        currentWaste.x = launcher.x;
+        currentWaste.y = launcher.y - 8;
+      }
+      drawWaste(currentWaste);
+    }
+
+    drawParticles();
+    drawFeedbacks();
+
+    requestAnimationFrame(loop);
+  }
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  }
+
+  function onStart(e) {
+    if (!running || projectile || !currentWaste) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    const dist = Math.hypot(pos.x - currentWaste.x, pos.y - currentWaste.y);
+    if (dist < currentWaste.radius + 30) {
+      isDragging = true;
+      dragStart = { x: currentWaste.x, y: currentWaste.y };
+      dragCurrent = pos;
+    }
+  }
+
+  function onMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    dragCurrent = getPos(e);
+  }
+
+  function onEnd(e) {
+    if (!isDragging || !currentWaste) return;
+    e.preventDefault();
+    isDragging = false;
+
+    const dx = dragStart.x - (dragCurrent ? dragCurrent.x : dragStart.x);
+    const dy = dragStart.y - (dragCurrent ? dragCurrent.y : dragStart.y);
+    const power = Math.min(Math.hypot(dx, dy), 180 * scale);
+
+    if (power > 18) {
+      const angle = Math.atan2(dy, dx);
+      const force = power * 0.22;
+      projectile = {
+        ...currentWaste,
+        vx: Math.cos(angle) * force,
+        vy: Math.sin(angle) * force,
+        rotation: 0,
+        rotSpeed: (Math.random() - 0.5) * 0.25
+      };
+      currentWaste = null;
+    } else {
+      currentWaste.x = launcher.x;
+      currentWaste.y = launcher.y - 8;
+    }
+    dragStart = null;
+    dragCurrent = null;
+  }
+
+  canvas.addEventListener('mousedown', onStart);
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseup', onEnd);
+  canvas.addEventListener('mouseleave', onEnd);
+
+  canvas.addEventListener('touchstart', onStart, { passive: false });
+  canvas.addEventListener('touchmove', onMove, { passive: false });
+  canvas.addEventListener('touchend', onEnd);
+  canvas.addEventListener('touchcancel', onEnd);
+
+  document.getElementById('start-btn').addEventListener('click', startGame);
+  document.getElementById('restart-btn').addEventListener('click', startGame);
+  document.getElementById('menu-btn').addEventListener('click', () => {
+    endScreen.classList.add('hidden');
+    startScreen.classList.remove('hidden');
+    running = false;
+  });
+
+  window.addEventListener('resize', () => {
+    resize();
+    if (currentWaste && !projectile) {
+      currentWaste.x = launcher.x;
+      currentWaste.y = launcher.y - 8;
+    }
+  });
+
+  resize();
+})();
+</script>
+</body>
+</html>

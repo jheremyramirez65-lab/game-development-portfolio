@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calculandia</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #0d0d1a;
+    font-family: 'Trebuchet MS', Verdana, sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+  #wrap {
+    position: relative;
+    width: 100%; height: 100%;
+    max-width: 900px; max-height: 500px;
+    margin: 0 auto;
+    background: #000;
+    border: 4px solid #1a1a2e;
+  }
+  @media (min-height: 560px) {
+    #wrap { margin-top: 30px; border-radius: 12px; box-shadow: 0 8px 0 #14141f, 0 12px 22px rgba(0,0,0,.5); }
+  }
+  canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+
+  #hud {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 14px; font-weight: bold; color: #fff; font-size: 14px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,.6);
+    pointer-events: none; z-index: 5;
+  }
+  #hud .badge { background: rgba(0,0,0,.35); padding: 4px 10px; border-radius: 8px; }
+
+  #touchControls {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding: 0 14px 14px; z-index: 5;
+  }
+  .tbtn {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(255,255,255,.18); border: 2px solid rgba(255,255,255,.5);
+    color: #fff; font-size: 20px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    touch-action: none;
+  }
+  .tbtn:active { background: rgba(255,255,255,.4); }
+  #moveGroup { display: flex; gap: 10px; }
+
+  #instructions {
+    position: absolute; top: 42px; left: 0; right: 0;
+    text-align: center; color: #fff; font-size: 11.5px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,.6);
+    pointer-events: none; z-index: 5; opacity: .9;
+  }
+
+  .overlay {
+    position: absolute; inset: 0; background: rgba(10,10,20,.88);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10; padding: 16px;
+  }
+  .hidden { display: none !important; }
+  .panel {
+    background: #2b2b3d; border: 4px solid #5c5c8a; border-radius: 14px;
+    padding: 22px; max-width: 420px; width: 100%; color: #fff; text-align: center;
+  }
+  .panel h1 { margin: 0 0 6px; font-size: 1.5em; color: #FFD54F; text-shadow: 2px 2px 0 #E65100; }
+  .panel p { color: #CFD8DC; font-size: .92em; line-height: 1.4; }
+  .start-btn, .next-btn, .restart-btn, .skip-btn {
+    display: inline-block; margin-top: 14px;
+    background: #42A5F5; border: none; border-bottom: 5px solid #1565C0;
+    border-radius: 10px; color: #fff; font-size: 1em; font-weight: bold;
+    padding: 12px 26px; cursor: pointer;
+  }
+  .skip-btn { background: #78909C; border-bottom-color: #455A64; margin-left: 8px; }
+  .start-btn:active, .next-btn:active, .restart-btn:active, .skip-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+
+  .question-box {
+    background: #3d3d5c; border: 3px solid #5c5c8a; border-radius: 12px;
+    padding: 18px 12px; font-size: 1.8em; font-weight: bold; margin-bottom: 16px; letter-spacing: 2px;
+  }
+  .gate-label { font-size: .8em; color: #FFD54F; margin-bottom: 6px; }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .opt-btn {
+    background: #FF7043; border: none; border-bottom: 5px solid #BF360C;
+    border-radius: 10px; color: #fff; font-size: 1.15em; font-weight: bold;
+    padding: 14px 6px; cursor: pointer;
+  }
+  .opt-btn:active:not(:disabled) { transform: translateY(2px); border-bottom-width: 2px; }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct { background: #66BB6A; border-color: #2E7D32; }
+  .opt-btn.incorrect { background: #EF5350; border-color: #B71C1C; }
+  .feedback { min-height: 26px; margin-top: 12px; font-weight: bold; }
+  .feedback.ok { color: #A5D6A7; }
+  .feedback.bad { color: #EF9A9A; }
+  .big-score { font-size: 2.6em; color: #FFD54F; font-weight: bold; margin: 8px 0; text-shadow: 2px 2px 0 #E65100; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div class="badge">👾 Enemigos vencidos: <span id="hudDefeated">0</span>/10</div>
+    <div class="badge">⭐ Puntaje: <span id="hudScore">0</span>/10</div>
+  </div>
+  <div id="instructions">← → mover · ESPACIO / ▲ saltar · toca un enemigo para retarlo (o salta por encima para esquivarlo)</div>
+
+  <div id="touchControls">
+    <div id="moveGroup">
+      <div class="tbtn" id="btnLeft">◀</div>
+      <div class="tbtn" id="btnRight">▶</div>
+    </div>
+    <div class="tbtn" id="btnJump">▲</div>
+  </div>
+
+  <!-- START -->
+  <div class="overlay" id="startScreen">
+    <div class="panel">
+      <h1>🎮 CALCULANDIA</h1>
+      <p>Explora un reino lleno de saltos, plataformas y desniveles. Verás enemigos numéricos en el camino: si los tocas te retan con una operación matemática — respóndela bien y ganas un punto. <b>No es obligatorio enfrentarlos</b>: si prefieres, salta por encima y sigue tu camino hasta la bandera final.</p>
+      <button class="start-btn" id="startBtn">▶ ENTRAR A CALCULANDIA</button>
+    </div>
+  </div>
+
+  <!-- QUESTION -->
+  <div class="overlay hidden" id="questionScreen">
+    <div class="panel">
+      <div class="gate-label">Reto de enemigo — responder es opcional</div>
+      <div class="question-box" id="questionText">?</div>
+      <div class="options" id="optionsGrid"></div>
+      <div class="feedback" id="feedbackText"></div>
+      <button class="next-btn hidden" id="nextBtn">Continuar ▶</button>
+    </div>
+  </div>
+
+  <!-- END -->
+  <div class="overlay hidden" id="endScreen">
+    <div class="panel">
+      <h1>🏁 ¡Meta alcanzada!</h1>
+      <div class="big-score"><span id="finalScore">0</span> / 10</div>
+      <p id="finalMessage"></p>
+      <button class="restart-btn" id="restartBtn">🔄 Jugar de nuevo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= CONFIG ================= */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const VIEW_W = 900, VIEW_H = 500;
+canvas.width = VIEW_W; canvas.height = VIEW_H;
+
+const GRAVITY = 0.7;
+const MOVE_SPEED = 4.2;
+const JUMP_VELOCITY = -13.5;
+const TOTAL_ENEMIES = 10;
+const PIT_COLOR = '#0d0d1a';
+
+/* ================= LEVEL BUILD (terreno irregular) ================= */
+let platforms = [];  // {start,end,y}
+let enemies = [];    // {x,y,w,h,min,max,dir,defeated,questionIndex}
+let flagX = 0, flagY = 0;
+let totalWidth = 0;
+
+const segDefs = [
+  { gap: 0,   width: 380, y: 380, enemyCount: 0 },  // zona de inicio, segura
+  { gap: 95,  width: 280, y: 380, enemyCount: 1 },
+  { gap: 105, width: 230, y: 320, enemyCount: 1 },   // sube
+  { gap: 10,  width: 260, y: 255, enemyCount: 1 },   // escalón alto
+  { gap: 115, width: 240, y: 305, enemyCount: 1 },   // baja un poco, salto real
+  { gap: 90,  width: 300, y: 380, enemyCount: 1 },   // vuelve al suelo
+  { gap: 10,  width: 280, y: 380, enemyCount: 2 },   // tramo llano ancho, 2 enemigos
+  { gap: 105, width: 240, y: 335, enemyCount: 1 },
+  { gap: 85,  width: 260, y: 380, enemyCount: 1 },
+  { gap: 125, width: 300, y: 325, enemyCount: 1 },   // salto largo
+  { gap: 95,  width: 420, y: 380, enemyCount: 0 },   // llanura final con bandera
+];
+
+function buildLevel() {
+  platforms = [];
+  enemies = [];
+  let cursor = 0;
+  let qIndex = 0;
+  segDefs.forEach((def, i) => {
+    cursor += def.gap;
+    const start = cursor;
+    const end = cursor + def.width;
+    platforms.push({ start, end, y: def.y });
+    if (def.enemyCount > 0) {
+      const usableW = def.width - 60;
+      for (let k = 0; k < def.enemyCount; k++) {
+        const slot = usableW / def.enemyCount;
+        const ex = start + 30 + slot * k + slot * 0.3;
+        const ew = 30, eh = 26;
+        const min = start + 14;
+        const max = end - 14 - ew;
+        enemies.push({
+          x: ex, y: def.y - eh, w: ew, h: eh,
+          min, max, dir: (k % 2 === 0 ? 1 : -1),
+          defeated: false, questionIndex: qIndex
+        });
+        qIndex++;
+      }
+    }
+    cursor = end;
+  });
+  flagX = cursor - 80;
+  flagY = segDefs[segDefs.length - 1].y;
+  totalWidth = cursor + 120;
+}
+
+/* ================= QUESTIONS ================= */
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function generateQuestion(operation) {
+  let a, b, answer, text;
+  switch (operation) {
+    case 'suma': a = randInt(5, 50); b = randInt(5, 50); answer = a + b; text = `${a} + ${b}`; break;
+    case 'resta': a = randInt(10, 60); b = randInt(1, a); answer = a - b; text = `${a} - ${b}`; break;
+    case 'multiplicacion': a = randInt(2, 12); b = randInt(2, 12); answer = a * b; text = `${a} × ${b}`; break;
+    case 'division': b = randInt(2, 12); answer = randInt(2, 12); a = b * answer; text = `${a} ÷ ${b}`; break;
+  }
+  return { text, answer };
+}
+function generateAlternatives(answer) {
+  const options = new Set([answer]);
+  while (options.size < 4) {
+    const c = answer + randInt(-10, 10);
+    if (c >= 0 && c !== answer) options.add(c);
+  }
+  return shuffle([...options]);
+}
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) { const j = randInt(0, i); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+  return arr;
+}
+function buildQuestionSet() {
+  const ops = ['suma', 'resta', 'multiplicacion', 'division'];
+  const set = [];
+  ops.forEach(op => { set.push(generateQuestion(op)); set.push(generateQuestion(op)); });
+  while (set.length < TOTAL_ENEMIES) set.push(generateQuestion(ops[randInt(0, ops.length - 1)]));
+  return shuffle(set).slice(0, TOTAL_ENEMIES).map(q => ({ ...q, options: generateAlternatives(q.answer) }));
+}
+
+let questions = [];
+let score = 0;
+let defeatedCount = 0;
+
+/* ================= PLAYER ================= */
+const player = { x: 40, y: 0, w: 28, h: 42, vx: 0, vy: 0, grounded: false, facing: 1, animT: 0 };
+const camera = { x: 0 };
+const keys = { left: false, right: false, jump: false };
+let lastGroundedX = 40, lastGroundedY = 0;
+
+function resetPlayer() {
+  const spawnPlatform = platforms[0];
+  player.x = 40; player.y = spawnPlatform.y - player.h;
+  player.vx = 0; player.vy = 0; player.grounded = true; player.facing = 1;
+  lastGroundedX = player.x; lastGroundedY = player.y;
+}
+
+/* ================= STATE ================= */
+let state = 'start'; // start | playing | question | end
+let activeEnemy = null;
+
+function startGame() {
+  buildLevel();
+  questions = buildQuestionSet();
+  score = 0; defeatedCount = 0;
+  resetPlayer();
+  camera.x = 0;
+  updateHud();
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('endScreen').classList.add('hidden');
+  state = 'playing';
+}
+function updateHud() {
+  document.getElementById('hudScore').textContent = score;
+  document.getElementById('hudDefeated').textContent = defeatedCount;
+}
+
+/* ---- Question overlay (opcional) ---- */
+function openQuestion(enemy) {
+  activeEnemy = enemy;
+  state = 'question';
+  const q = questions[enemy.questionIndex];
+  document.getElementById('questionText').textContent = q.text + ' = ?';
+  document.getElementById('feedbackText').textContent = '';
+  document.getElementById('feedbackText').className = 'feedback';
+  document.getElementById('nextBtn').classList.add('hidden');
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = opt;
+    btn.onclick = () => answerQuestion(opt, btn, enemy, q);
+    grid.appendChild(btn);
+  });
+  document.getElementById('questionScreen').classList.remove('hidden');
+}
+function answerQuestion(selected, btnEl, enemy, q) {
+  const buttons = document.querySelectorAll('#optionsGrid .opt-btn');
+  buttons.forEach(b => b.disabled = true);
+  const feedback = document.getElementById('feedbackText');
+  const correct = selected === q.answer;
+  if (correct) {
+    score++;
+    btnEl.classList.add('correct');
+    feedback.textContent = '✅ ¡Correcto! +1 punto. Enemigo vencido.';
+    feedback.className = 'feedback ok';
+  } else {
+    btnEl.classList.add('incorrect');
+    buttons.forEach(b => { if (parseInt(b.textContent) === q.answer) b.classList.add('correct'); });
+    feedback.textContent = `❌ Incorrecto. Era ${q.answer}. El enemigo se retira igual.`;
+    feedback.className = 'feedback bad';
+  }
+  enemy.defeated = true;
+  defeatedCount++;
+  updateHud();
+  document.getElementById('nextBtn').classList.remove('hidden');
+}
+document.getElementById('nextBtn').addEventListener('click', () => {
+  document.getElementById('questionScreen').classList.add('hidden');
+  state = 'playing';
+  activeEnemy = null;
+});
+
+function showEnd() {
+  state = 'end';
+  document.getElementById('finalScore').textContent = score;
+  let msg;
+  if (score === 10) msg = '🏆 ¡Puntaje perfecto! Eres un maestro de las matemáticas.';
+  else if (score >= 8) msg = '🌟 ¡Excelente trabajo! Dominas muy bien las operaciones.';
+  else if (score >= 6) msg = '👍 ¡Buen intento! Vas por buen camino.';
+  else if (score >= 4) msg = '💪 Sigue practicando, ¡puedes mejorar!';
+  else if (score > 0) msg = '📚 Repasa las operaciones y vuelve a intentarlo.';
+  else msg = '🏃 ¡Cruzaste todo Calculandia! Si te animas, reta a los enemigos la próxima vez para sumar puntos.';
+  document.getElementById('finalMessage').textContent = msg;
+  document.getElementById('endScreen').classList.remove('hidden');
+}
+
+/* ================= INPUT ================= */
+window.addEventListener('keydown', e => {
+  if (['ArrowLeft','ArrowRight','ArrowUp',' '].includes(e.key)) e.preventDefault();
+  if (e.key === 'ArrowLeft') keys.left = true;
+  if (e.key === 'ArrowRight') keys.right = true;
+  if (e.key === 'ArrowUp' || e.key === ' ') keys.jump = true;
+});
+window.addEventListener('keyup', e => {
+  if (e.key === 'ArrowLeft') keys.left = false;
+  if (e.key === 'ArrowRight') keys.right = false;
+  if (e.key === 'ArrowUp' || e.key === ' ') keys.jump = false;
+});
+function bindTouch(id, onDown, onUp) {
+  const el = document.getElementById(id);
+  el.addEventListener('touchstart', e => { e.preventDefault(); onDown(); });
+  el.addEventListener('touchend', e => { e.preventDefault(); onUp(); });
+  el.addEventListener('mousedown', e => { e.preventDefault(); onDown(); });
+  el.addEventListener('mouseup', e => { e.preventDefault(); onUp(); });
+  el.addEventListener('mouseleave', () => onUp());
+}
+bindTouch('btnLeft', () => keys.left = true, () => keys.left = false);
+bindTouch('btnRight', () => keys.right = true, () => keys.right = false);
+bindTouch('btnJump', () => keys.jump = true, () => keys.jump = false);
+
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('restartBtn').addEventListener('click', () => {
+  document.getElementById('endScreen').classList.add('hidden');
+  document.getElementById('startScreen').classList.remove('hidden');
+  state = 'start';
+});
+
+/* ================= UPDATE / PHYSICS ================= */
+function landingCheck(prevY, nextY) {
+  const feetX = player.x + player.w / 2;
+  let landed = null;
+  platforms.forEach(p => {
+    if (feetX < p.start || feetX > p.end) return;
+    const prevBottom = prevY + player.h;
+    const nextBottom = nextY + player.h;
+    if (prevBottom <= p.y + 2 && nextBottom >= p.y) {
+      if (!landed || p.y < landed.y) landed = p;
+    }
+  });
+  return landed;
+}
+
+function update() {
+  if (state === 'playing') {
+    player.vx = 0;
+    if (keys.left) { player.vx = -MOVE_SPEED; player.facing = -1; }
+    if (keys.right) { player.vx = MOVE_SPEED; player.facing = 1; }
+    if (keys.jump && player.grounded) { player.vy = JUMP_VELOCITY; player.grounded = false; }
+
+    let nextX = player.x + player.vx;
+    nextX = Math.max(0, Math.min(nextX, totalWidth - player.w));
+    player.x = nextX;
+
+    const prevY = player.y;
+    player.vy += GRAVITY;
+    let nextY = player.y + player.vy;
+
+    if (player.vy >= 0) {
+      const landed = landingCheck(prevY, nextY);
+      if (landed) {
+        player.y = landed.y - player.h;
+        player.vy = 0;
+        player.grounded = true;
+        lastGroundedX = player.x;
+        lastGroundedY = player.y;
+      } else {
+        player.y = nextY;
+        player.grounded = false;
+      }
+    } else {
+      player.y = nextY;
+      player.grounded = false;
+    }
+
+    // cayó a un pozo -> reaparece en el último punto seguro
+    if (player.y > VIEW_H + 60) {
+      player.x = lastGroundedX;
+      player.y = lastGroundedY;
+      player.vx = 0; player.vy = 0; player.grounded = true;
+    }
+
+    // enemigos: patrullan y detectan colisión (retos opcionales)
+    enemies.forEach(en => {
+      if (en.defeated) return;
+      en.x += en.dir * 0.9;
+      if (en.x <= en.min) { en.x = en.min; en.dir = 1; }
+      if (en.x >= en.max) { en.x = en.max; en.dir = -1; }
+
+      const overlap = player.x < en.x + en.w && player.x + player.w > en.x &&
+                       player.y < en.y + en.h && player.y + player.h > en.y;
+      if (overlap) openQuestion(en);
+    });
+
+    // bandera final
+    if (player.x + player.w >= flagX) {
+      showEnd();
+    }
+
+    camera.x = Math.max(0, Math.min(player.x - VIEW_W / 2.5, totalWidth - VIEW_W));
+    player.animT += Math.abs(player.vx) > 0.1 ? 0.25 : 0;
+  }
+}
+
+/* ================= RENDER ================= */
+function drawBackground() {
+  const grad = ctx.createLinearGradient(0, 0, 0, VIEW_H);
+  grad.addColorStop(0, '#6EC6FF');
+  grad.addColorStop(1, '#BBDEFB');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  for (let i = 0; i < 10; i++) {
+    const cx = (i * 260 - camera.x * 0.3);
+    const wrapped = ((cx % (VIEW_W + 300)) + (VIEW_W + 300)) % (VIEW_W + 300) - 150;
+    drawCloud(wrapped, 40 + (i % 3) * 30);
+  }
+  ctx.fillStyle = '#8BC34A';
+  for (let i = 0; i < 12; i++) {
+    const hx = i * 300 - camera.x * 0.6;
+    ctx.beginPath();
+    ctx.ellipse(hx, 430, 160, 70, 0, Math.PI, 2 * Math.PI);
+    ctx.fill();
+  }
+}
+function drawCloud(x, y) {
+  ctx.beginPath();
+  ctx.ellipse(x, y, 26, 16, 0, 0, Math.PI * 2);
+  ctx.ellipse(x + 22, y + 4, 20, 13, 0, 0, Math.PI * 2);
+  ctx.ellipse(x - 22, y + 4, 20, 13, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawPlatforms() {
+  platforms.forEach(p => {
+    const sx = p.start - camera.x;
+    const w = p.end - p.start;
+    if (sx + w < 0 || sx > VIEW_W) return;
+    ctx.fillStyle = '#8D6E63';
+    ctx.fillRect(sx, p.y, w, VIEW_H - p.y);
+    ctx.fillStyle = '#689F38';
+    ctx.fillRect(sx, p.y, w, 10);
+    ctx.fillStyle = '#7CB342';
+    ctx.fillRect(sx, p.y, w, 4);
+  });
+}
+
+function drawEnemies() {
+  enemies.forEach(en => {
+    if (en.defeated) return;
+    const sx = en.x - camera.x;
+    if (sx + en.w < 0 || sx > VIEW_W) return;
+    const bob = Math.sin(Date.now() / 220 + en.x) * 2;
+    ctx.fillStyle = '#8E24AA';
+    ctx.beginPath();
+    ctx.ellipse(sx + en.w/2, en.y + en.h/2 + bob, en.w/2, en.h/2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // ojos
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.ellipse(sx + en.w/2 - 6, en.y + en.h/2 - 3 + bob, 4.5, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(sx + en.w/2 + 6, en.y + en.h/2 - 3 + bob, 4.5, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#1a1a2e';
+    ctx.beginPath();
+    ctx.arc(sx + en.w/2 - 6 + en.dir, en.y + en.h/2 - 3 + bob, 2, 0, Math.PI * 2);
+    ctx.arc(sx + en.w/2 + 6 + en.dir, en.y + en.h/2 - 3 + bob, 2, 0, Math.PI * 2);
+    ctx.fill();
+    // interrogante flotante
+    ctx.fillStyle = '#FFD54F';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('?', sx + en.w/2, en.y - 8 + bob);
+  });
+}
+
+function drawFlag() {
+  const fx = flagX - camera.x;
+  if (fx > -60 && fx < VIEW_W + 60) {
+    ctx.fillStyle = '#8D6E63';
+    ctx.fillRect(fx - 3, flagY - 150, 6, 150);
+    ctx.fillStyle = '#66BB6A';
+    ctx.beginPath();
+    ctx.moveTo(fx + 3, flagY - 150);
+    ctx.lineTo(fx + 46, flagY - 132);
+    ctx.lineTo(fx + 3, flagY - 114);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+function roundRect(x, y, w, h, r, fill, stroke) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+  if (fill) ctx.fill();
+  if (stroke) ctx.stroke();
+}
+
+function drawPlayer() {
+  const sx = player.x - camera.x;
+  const sy = player.y;
+  ctx.save();
+  ctx.translate(sx + player.w / 2, sy + player.h / 2);
+  ctx.scale(player.facing, 1);
+  ctx.fillStyle = '#E53935';
+  roundRect(-player.w/2, -player.h/2 + 10, player.w, player.h - 18, 5, true, false);
+  ctx.fillStyle = '#FFCCBC';
+  ctx.beginPath();
+  ctx.arc(0, -player.h/2 + 4, 10, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#1E88E5';
+  ctx.beginPath();
+  ctx.arc(0, -player.h/2 + 1, 10, Math.PI, 2 * Math.PI);
+  ctx.fill();
+  ctx.fillRect(-10, -player.h/2 - 1, 20, 4);
+  ctx.fillRect(6, -player.h/2 - 1, 10, 3);
+  const legOffset = player.grounded ? Math.sin(player.animT) * 6 : 4;
+  ctx.fillStyle = '#3949AB';
+  ctx.fillRect(-player.w/2 + 2, player.h/2 - 12, 8, 12 + legOffset * 0.2);
+  ctx.fillRect(player.w/2 - 10, player.h/2 - 12, 8, 12 - legOffset * 0.2);
+  ctx.restore();
+}
+
+function render() {
+  drawBackground();
+  drawPlatforms();
+  drawEnemies();
+  drawFlag();
+  if (state === 'playing' || state === 'question') drawPlayer();
+}
+
+/* ================= LOOP ================= */
+function loop() {
+  update();
+  render();
+  requestAnimationFrame(loop);
+}
+buildLevel();
+resetPlayer();
+loop();
+</script>
+</body>
+</html>

@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanCity: De Cero a la Libertad - Juego de Finanzas Personales</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        .pulse-speed {
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+
+    <!-- Top Header / Bar Stats -->
+    <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-2.5 shadow-lg">
+        <div class="max-w-md mx-auto flex flex-col gap-2">
+            <!-- Top Row: Logo, Player Tag & Date -->
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg border border-emerald-500/30">
+                        <i class="fa-solid fa-city"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xs font-black tracking-wider text-white uppercase">FINANCITY</h1>
+                        <p class="text-[9px] text-emerald-400 font-bold tracking-tight">DE CERO A LA LIBERTAD</p>
+                    </div>
+                </div>
+                <div class="text-right flex items-center gap-1.5">
+                    <span id="player-name-tag" class="bg-indigo-950/80 text-indigo-300 text-[11px] px-2 py-0.5 rounded-full font-bold border border-indigo-500/30 flex items-center gap-1">
+                        <i class="fa-solid fa-user text-[9px]"></i> <span id="player-display-name">Jugador</span>
+                    </span>
+                    <span id="game-date" class="bg-slate-800 text-amber-300 text-xs px-2.5 py-0.5 rounded-full font-mono font-bold border border-slate-700 flex items-center gap-1">
+                        <i class="fa-regular fa-calendar-days text-[10px] text-slate-400"></i> <span id="display-date-text">Día 1, Ene 2026</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Second Row: Cash & Net Worth -->
+            <div class="grid grid-cols-2 gap-2">
+                <div class="bg-slate-800/80 p-2 rounded-xl border border-slate-700/60 flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-[9px] text-slate-400 font-medium">Efectivo Disponible</p>
+                        <p id="stat-cash" class="text-xs sm:text-sm font-bold text-emerald-400 font-mono leading-none">$150</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/80 p-2 rounded-xl border border-slate-700/60 flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-[9px] text-slate-400 font-medium">Patrimonio Neto</p>
+                        <p id="stat-networth" class="text-xs sm:text-sm font-bold text-indigo-300 font-mono leading-none">-$650</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Third Row: Health, Happiness & Monthly Cash Flow -->
+            <div class="grid grid-cols-3 gap-2 text-xs">
+                <!-- Health Bar -->
+                <div class="bg-slate-800/50 p-1.5 rounded-lg border border-slate-700/40">
+                    <div class="flex justify-between text-[10px] text-slate-300 mb-0.5">
+                        <span class="flex items-center gap-1"><i class="fa-solid fa-heart text-red-500"></i> Salud</span>
+                        <span id="stat-health-num" class="font-bold">60%</span>
+                    </div>
+                    <div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div id="stat-health-bar" class="bg-red-500 h-full rounded-full transition-all duration-300" style="width: 60%"></div>
+                    </div>
+                </div>
+
+                <!-- Happiness Bar -->
+                <div class="bg-slate-800/50 p-1.5 rounded-lg border border-slate-700/40">
+                    <div class="flex justify-between text-[10px] text-slate-300 mb-0.5">
+                        <span class="flex items-center gap-1"><i class="fa-solid fa-face-smile text-amber-400"></i> Ánimo</span>
+                        <span id="stat-happy-num" class="font-bold">50%</span>
+                    </div>
+                    <div class="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div id="stat-happy-bar" class="bg-amber-400 h-full rounded-full transition-all duration-300" style="width: 50%"></div>
+                    </div>
+                </div>
+
+                <!-- Monthly Cash Flow -->
+                <div class="bg-slate-800/50 p-1.5 rounded-lg border border-slate-700/40 flex flex-col justify-center items-center">
+                    <span class="text-[9px] text-slate-400 uppercase tracking-wider">Flujo/Mes</span>
+                    <span id="stat-flow" class="font-mono font-bold text-xs text-emerald-400">+$120/m</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Game Viewport -->
+    <main class="max-w-md mx-auto w-full flex-1 p-3 flex flex-col gap-3">
+        
+        <!-- Character Stage -->
+        <div id="stage-card" class="relative rounded-2xl overflow-hidden border border-slate-800 shadow-xl min-h-[200px] flex flex-col justify-between p-3.5 bg-gradient-to-b from-slate-900 to-slate-950 transition-all duration-500">
+            <!-- Background Visual Grid -->
+            <div id="stage-bg" class="absolute inset-0 opacity-25 bg-cover bg-center transition-all duration-500" style="background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 16px 16px;"></div>
+
+            <!-- Top Stage Badge -->
+            <div class="relative z-10 flex justify-between items-center">
+                <span id="stage-location" class="bg-slate-950/80 backdrop-blur border border-slate-700/50 text-slate-300 text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                    <i class="fa-solid fa-campground text-amber-500"></i> Viviendo en: Tienda / Calle
+                </span>
+                <span id="edu-badge" class="bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-[10px] px-2 py-0.5 rounded-md font-semibold">
+                    Lvl 1 Financiero
+                </span>
+            </div>
+
+            <!-- Avatar Render Box -->
+            <div class="relative z-10 my-2 flex justify-center items-center">
+                <div class="relative group">
+                    <div id="avatar-container" class="w-24 h-28 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                        <svg viewBox="0 0 100 120" class="w-full h-full drop-shadow-2xl">
+                            <!-- Shadow -->
+                            <ellipse cx="50" cy="115" rx="30" ry="5" fill="#000" opacity="0.4" />
+                            
+                            <!-- Body/Torso -->
+                            <path id="avatar-shirt" d="M30 65 L70 65 L65 100 L35 100 Z" fill="#64748b" />
+                            <!-- Pants -->
+                            <path id="avatar-pants" d="M35 95 L65 95 L65 112 L35 112 Z" fill="#334155" />
+                            
+                            <!-- Head & Neck -->
+                            <rect x="44" y="52" width="12" height="15" fill="#fca5a5" rx="2" />
+                            <circle cx="50" cy="38" r="22" fill="#fca5a5" />
+                            
+                            <!-- Hair -->
+                            <path d="M28 32 C30 15, 70 15, 72 32 C65 24, 35 24, 28 32 Z" fill="#451a03" />
+                            
+                            <!-- Face Expression -->
+                            <g id="avatar-face">
+                                <circle cx="42" cy="36" r="3" fill="#1e293b" />
+                                <circle cx="58" cy="36" r="3" fill="#1e293b" />
+                                <path id="avatar-eyebrows" d="M38 30 L46 32 M62 30 L54 32" stroke="#451a03" stroke-width="2" stroke-linecap="round" />
+                                <path id="avatar-mouth" d="M42 48 Q50 42 58 48" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round" />
+                            </g>
+
+                            <!-- Accessories -->
+                            <g id="avatar-accessory" class="hidden">
+                                <rect x="30" y="14" width="40" height="8" rx="2" fill="#0f172a" />
+                                <rect x="38" y="4" width="24" height="12" rx="2" fill="#0f172a" />
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assistant Sofía Speech Bubble -->
+            <div class="relative z-10 bg-slate-900/90 border border-emerald-500/30 rounded-xl p-2.5 flex items-start gap-2 shadow-lg">
+                <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/40 text-xs">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <div class="flex-1 text-[11px] leading-tight text-slate-200">
+                    <span class="font-bold text-emerald-400 block mb-0.5">Sofía - Asesora FinanCity</span>
+                    <p id="assistant-text">¡Hola! El tiempo avanza día a día. Cuida tu salud y adquiere activos para asegurar tu futuro.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="grid grid-cols-6 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-medium">
+            <button onclick="switchTab('jobs')" id="tab-jobs" class="tab-btn py-2 rounded-lg flex flex-col items-center gap-1 transition-all bg-emerald-600 text-white shadow-sm">
+                <i class="fa-solid fa-briefcase"></i>
+                <span class="text-[9px]">Trabajo</span>
+            </button>
+            <button onclick="switchTab('health')" id="tab-health" class="tab-btn py-2 rounded-lg flex flex-col items-center gap-1 transition-all text-slate-400 hover:text-slate-200">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span class="text-[9px]">Salud</span>
+            </button>
+            <button onclick="switchTab('mood')" id="tab-mood" class="tab-btn py-2 rounded-lg flex flex-col items-center gap-1 transition-all text-slate-400 hover:text-slate-200 relative">
+                <i class="fa-solid fa-face-smile text-amber-400"></i>
+                <span class="text-[9px]">Ánimo</span>
+            </button>
+            <button onclick="switchTab('future')" id="tab-future" class="tab-btn py-2 rounded-lg flex flex-col items-center gap-1 transition-all text-slate-400 hover:text-slate-200 relative">
+                <i class="fa-solid fa-rocket"></i>
+                <span class="text-[9px]">Futuro</span>
+                <span id="future-alert-dot" class="absolute top-1 right-1.5 w-2 h-2 bg-amber-400 rounded-full animate-ping"></span>
+            </button>
+            <button onclick="switchTab('finance')" id="tab-finance" class="tab-btn py-2 rounded-lg flex flex-col items-center gap-1 transition-all text-slate-400 hover:text-slate-200 relative">
+                <i class="fa-solid fa-building-columns"></i>
+                <span class="text-[9px]">Banco</span>
+                <span id="debt-alert-dot" class="absolute top-1 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+            </button>
+            <button onclick="switchTab('education')" id="tab-education" class="tab-btn py-2 rounded-lg flex flex-col items-center gap-1 transition-all text-slate-400 hover:text-slate-200">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span class="text-[9px]">Cursos</span>
+            </button>
+        </div>
+
+        <!-- Tab Content Areas -->
+        <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-3 flex-1 flex flex-col justify-between min-h-[260px]">
+            
+            <!-- PANEL 1: TRABAJOS Y ESTILO DE VIDA -->
+            <div id="panel-jobs" class="tab-panel space-y-3">
+                <div class="flex justify-between items-center mb-1">
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-briefcase text-emerald-400"></i> Empleo y Vivienda
+                    </h2>
+                    <span class="text-[10px] text-amber-400 font-semibold">Cursos requeridos para ascender</span>
+                </div>
+
+                <!-- Jobs Sub-section -->
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-400 mb-1.5">Puesto de Trabajo</p>
+                    <div id="jobs-list" class="space-y-2"></div>
+                </div>
+
+                <!-- Housing Sub-section -->
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-400 mb-1.5">Vivienda Fija (Cobro Mensual)</p>
+                    <div id="housing-list" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- PANEL 2: SALUD MENTAL Y TRATAMIENTOS MÉDICOS -->
+            <div id="panel-health" class="tab-panel hidden space-y-3">
+                <div class="flex justify-between items-center mb-1">
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-heart-pulse text-red-400"></i> Centro de Salud Física
+                    </h2>
+                    <span class="text-[10px] text-emerald-400">Cuida tu cuerpo</span>
+                </div>
+
+                <!-- Heal Health Options -->
+                <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-2.5 space-y-2">
+                    <h3 class="text-xs font-bold text-red-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-kit-medical"></i> Tratamientos de Salud
+                    </h3>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button onclick="healHealth('pharmacy')" class="p-2 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-xl flex justify-between items-center text-left transition-all">
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">Comprar Medicina / Farmacia</p>
+                                <p class="text-[10px] text-slate-400">+15% Salud inmediata</p>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-amber-400">-$20</span>
+                        </button>
+                        <button onclick="healHealth('doctor')" class="p-2 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-xl flex justify-between items-center text-left transition-all">
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">Consulta Médica General</p>
+                                <p class="text-[10px] text-slate-400">+35% Salud inmediata</p>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-amber-400">-$55</span>
+                        </button>
+                        <button onclick="healHealth('checkup')" class="p-2 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-xl flex justify-between items-center text-left transition-all">
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">Tratamiento Clínico Completo</p>
+                                <p class="text-[10px] text-slate-400">+70% Salud inmediata</p>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-amber-400">-$130</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Monthly Health Subscriptions -->
+                <div id="gym-subscription-card" class="bg-indigo-950/30 border border-indigo-500/30 rounded-xl p-2.5 flex justify-between items-center">
+                    <div>
+                        <h4 class="text-xs font-bold text-indigo-300">Membresía de Gimnasio & Nutrición</h4>
+                        <p class="text-[10px] text-indigo-200/80">+5% Salud de forma automática cada mes</p>
+                    </div>
+                    <button id="btn-toggle-gym" onclick="toggleGymSubscription()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all shadow">
+                        Suscribir (-$35/mes)
+                    </button>
+                </div>
+            </div>
+
+            <!-- PANEL 3: NUEVO APARTADO DEDICADO AL ÁNIMO -->
+            <div id="panel-mood" class="tab-panel hidden space-y-3">
+                <div class="flex justify-between items-center mb-1">
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-face-smile text-amber-400"></i> Centro de Ánimo y Salud Mental
+                    </h2>
+                    <span id="mood-effect-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Ánimo Normal</span>
+                </div>
+
+                <div class="bg-amber-950/20 border border-amber-500/30 p-2.5 rounded-xl text-[11px] text-slate-300">
+                    <p class="font-bold text-amber-400 mb-0.5"><i class="fa-solid fa-bolt"></i> Impacto del Ánimo en tus Ingresos:</p>
+                    <ul class="list-disc list-inside space-y-0.5 text-[10px] text-slate-400">
+                        <li><b class="text-emerald-400">Ánimo &gt; 80%:</b> Motivado (+10% Bonificación de Productividad)</li>
+                        <li><b class="text-slate-300">Ánimo 21% - 79%:</b> Productividad estándar</li>
+                        <li><b class="text-red-400">Ánimo &lt; 20%:</b> Desanimado (-20% Penalización en Ingresos)</li>
+                    </ul>
+                </div>
+
+                <!-- Boost Mood Options -->
+                <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-2.5 space-y-2">
+                    <h3 class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-icons"></i> Actividades de Bienestar y Ocio
+                    </h3>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button onclick="boostMood('walk')" class="p-2 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-xl flex justify-between items-center text-left transition-all">
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">Paseo al Aire Libre y Meditación</p>
+                                <p class="text-[10px] text-slate-400">+8% Ánimo (Gratis)</p>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-emerald-400">$0</span>
+                        </button>
+                        <button onclick="boostMood('hobbies')" class="p-2 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-xl flex justify-between items-center text-left transition-all">
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">Tarde de Videojuegos y Pasatiempos</p>
+                                <p class="text-[10px] text-slate-400">+15% Ánimo</p>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-amber-400">-$15</span>
+                        </button>
+                        <button onclick="boostMood('cinema')" class="p-2 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-xl flex justify-between items-center text-left transition-all">
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">Salida al Cine y Cena con Amigos</p>
+                                <p class="text-[10px] text-slate-400">+25% Ánimo</p>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-amber-400">-$35</span>
+                        </button>
+                        <button onclick="boostMood('therapy')" class="p-2 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-xl flex justify-between items-center text-left transition-all">
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">Sesión de Coaching / Terapia Mental</p>
+                                <p class="text-[10px] text-slate-400">+40% Ánimo de alta efectividad</p>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-amber-400">-$75</span>
+                        </button>
+                        <button onclick="boostMood('trip')" class="p-2 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 rounded-xl flex justify-between items-center text-left transition-all">
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">Viaje de Vacaciones a la Playa</p>
+                                <p class="text-[10px] text-slate-400">+60% Ánimo y descanso total</p>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-amber-400">-$180</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL 4: COMPRAS PARA EL FUTURO (ACTIVOS Y HERRAMIENTAS) -->
+            <div id="panel-future" class="tab-panel hidden space-y-3">
+                <div class="flex justify-between items-center mb-1">
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-rocket text-amber-400"></i> Opciones de Compra para tu Futuro
+                    </h2>
+                    <span class="text-[10px] text-amber-400">Invierte en tus Activos</span>
+                </div>
+
+                <p class="text-[11px] text-slate-400 leading-snug">
+                    Comprar estas herramientas y bienes cambiará drásticamente tus ingresos futuros y te abrirá nuevas fuentes de dinero pasivo.
+                </p>
+
+                <div id="future-purchases-list" class="space-y-2">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- PANEL 4: BANCO Y FINANZAS -->
+            <div id="panel-finance" class="tab-panel hidden space-y-3">
+                <div class="flex justify-between items-center mb-1">
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-building-columns text-indigo-400"></i> Banco FinanCity
+                    </h2>
+                    <span class="text-[10px] text-emerald-400">Tasa Ahorro: 0.6%/mes</span>
+                </div>
+
+                <!-- Credit Card Debt Box -->
+                <div class="bg-red-950/30 border border-red-500/30 rounded-xl p-3 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-credit-card text-red-400 text-sm"></i>
+                            <div>
+                                <h3 class="text-xs font-bold text-red-200">Deuda Tarjeta de Crédito</h3>
+                                <p class="text-[10px] text-red-400/80">Tasa: 3.5% mensual (42% anual)</p>
+                            </div>
+                        </div>
+                        <span id="finance-card-debt" class="text-sm font-mono font-bold text-red-400">$800</span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="payDebt(50)" class="flex-1 py-1.5 bg-red-600/30 hover:bg-red-600/50 border border-red-500/40 rounded-lg text-xs font-bold text-red-200 transition-all">
+                            Pagar $50
+                        </button>
+                        <button onclick="payDebt(200)" class="flex-1 py-1.5 bg-red-600/30 hover:bg-red-600/50 border border-red-500/40 rounded-lg text-xs font-bold text-red-200 transition-all">
+                            Pagar $200
+                        </button>
+                        <button onclick="payDebt('all')" class="flex-1 py-1.5 bg-red-600 hover:bg-red-500 rounded-lg text-xs font-bold text-white transition-all shadow">
+                            Pagar Todo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Emergency Fund Box -->
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                                <i class="fa-solid fa-shield-halved text-emerald-400"></i> Fondo de Emergencia
+                            </h3>
+                            <p class="text-[10px] text-slate-400">Protección contra imprevistos</p>
+                        </div>
+                        <span id="finance-emergency-fund" class="text-sm font-mono font-bold text-emerald-400">$0</span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="depositEmergency(50)" class="flex-1 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 rounded-lg text-xs font-semibold text-emerald-300">
+                            + Depositar $50
+                        </button>
+                        <button onclick="withdrawEmergency(50)" class="flex-1 py-1.5 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold text-slate-300">
+                            - Retirar $50
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Investments Box -->
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                                <i class="fa-solid fa-chart-pie text-indigo-400"></i> Fondo de Inversión
+                            </h3>
+                            <p class="text-[10px] text-slate-400">Rendimiento: 0.9%/mes (Interés Compuesto)</p>
+                        </div>
+                        <span id="finance-investments" class="text-sm font-mono font-bold text-indigo-300">$0</span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="investMoney(100)" class="flex-1 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 rounded-lg text-xs font-semibold text-indigo-200">
+                            Invertir $100
+                        </button>
+                        <button onclick="withdrawInvestment(100)" class="flex-1 py-1.5 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs font-semibold text-slate-300">
+                            Retirar $100
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL 5: EDUCACIÓN Y TRIVIAS -->
+            <div id="panel-education" class="tab-panel hidden space-y-3">
+                <div class="flex justify-between items-center mb-1">
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-graduation-cap text-emerald-400"></i> Módulos FinanCity
+                    </h2>
+                    <span class="text-[10px] text-amber-400 font-semibold"><i class="fa-solid fa-star"></i> Ganancias + Bonos</span>
+                </div>
+
+                <div id="education-modules" class="space-y-2">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Bottom Time & Speed Control Bar -->
+    <footer class="sticky bottom-0 z-30 bg-slate-900 border-t border-slate-800 p-3 shadow-2xl">
+        <div class="max-w-md mx-auto flex items-center justify-between gap-2">
+            <!-- Day Clock Indicator -->
+            <div class="flex items-center gap-2 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">
+                <i class="fa-solid fa-clock text-amber-400 text-xs animate-pulse"></i>
+                <div>
+                    <p class="text-[9px] text-slate-400 leading-none">Paso de Días</p>
+                    <p id="clock-status-text" class="text-xs font-mono font-bold text-slate-200 leading-tight">1 día / sec</p>
+                </div>
+            </div>
+
+            <!-- Speed Toggle Buttons -->
+            <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button onclick="setGameSpeed(0)" id="speed-btn-0" class="speed-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500/20 text-amber-400 border border-amber-500/40">
+                    <i class="fa-solid fa-pause"></i>
+                </button>
+                <button onclick="setGameSpeed(1)" id="speed-btn-1" class="speed-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200">
+                    1x
+                </button>
+                <button onclick="setGameSpeed(2)" id="speed-btn-2" class="speed-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200">
+                    2x
+                </button>
+                <button onclick="setGameSpeed(4)" id="speed-btn-4" class="speed-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200">
+                    4x 🚀
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL POPUP FOR RANDOM EVENTS & TRIVIA -->
+    <div id="modal-overlay" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3">
+                <div id="modal-icon-container" class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30 shrink-0">
+                    <i id="modal-icon" class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h3 id="modal-title" class="text-sm font-bold text-white">Evento Financiero</h3>
+                    <p id="modal-subtitle" class="text-[11px] text-slate-400">Toma una decisión responsable</p>
+                </div>
+            </div>
+
+            <p id="modal-body" class="text-xs text-slate-300 leading-relaxed">
+                Texto del evento o pregunta...
+            </p>
+
+            <div id="modal-options" class="space-y-2 pt-2">
+                <!-- Dynamically populated buttons -->
+            </div>
+        </div>
+    </div>
+
+    <!-- START / PLAYER NAME MODAL -->
+    <div id="start-modal-overlay" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-emerald-500/40 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 mx-auto flex items-center justify-center text-3xl shadow-lg shadow-emerald-500/10">
+                <i class="fa-solid fa-city"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-black text-white tracking-wide">FinanCity</h2>
+                <p class="text-xs text-emerald-400 font-bold uppercase tracking-wider">De Cero a la Libertad</p>
+                <p class="text-xs text-slate-400 mt-2">Los días y meses transcurren automáticamente. Toma decisiones inteligentes de compra para construir tu futuro.</p>
+            </div>
+
+            <form onsubmit="startGameWithPlayerName(event)" class="space-y-3 pt-2">
+                <div class="text-left">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nombre del Jugador</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-3 top-3 text-slate-500 text-xs"></i>
+                        <input id="input-player-name" type="text" maxlength="15" required placeholder="Ej: Alex" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 text-slate-100 text-xs rounded-xl pl-8 pr-3 py-2.5 focus:outline-none transition-all font-semibold">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play"></i>
+                    <span>Iniciar Simulación</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- GAME OVER / VICTORY MODAL -->
+    <div id="end-modal-overlay" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+            <div id="end-icon-bg" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl">
+                <i id="end-icon" class="fa-solid fa-trophy"></i>
+            </div>
+
+            <h2 id="end-title" class="text-lg font-bold text-white">¡FELICITACIONES!</h2>
+            <p id="end-message" class="text-xs text-slate-300 leading-relaxed">Mensaje final...</p>
+
+            <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700 text-left text-xs space-y-1.5 font-mono">
+                <div class="flex justify-between"><span class="text-slate-400">Tiempo Jugado:</span><span id="end-stat-months" class="text-white">24 meses</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Patrimonio Final:</span><span id="end-stat-networth" class="text-emerald-400">$52,400</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">Deudas Pendientes:</span><span id="end-stat-debt" class="text-red-400">$0</span></div>
+            </div>
+
+            <button onclick="resetGame()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-bold text-xs text-white rounded-xl shadow-lg transition-all">
+                <i class="fa-solid fa-rotate-right mr-1"></i> Jugar de Nuevo
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Web Audio API Synthesizer for sound effects
+        const sfx = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+            playBeep(freq, duration, type = 'sine', gainVal = 0.05) {
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {
+                    // Audio context fallback safeguard
+                }
+            },
+            playClick() { this.playBeep(600, 0.05, 'sine', 0.03); },
+            playSuccess() { 
+                this.playBeep(523.25, 0.1, 'triangle', 0.05);
+                setTimeout(() => this.playBeep(659.25, 0.15, 'triangle', 0.05), 100);
+            },
+            playWarning() { 
+                this.playBeep(220, 0.15, 'sawtooth', 0.05);
+                setTimeout(() => this.playBeep(180, 0.2, 'sawtooth', 0.05), 150);
+            },
+            playMoney() {
+                this.playBeep(880, 0.08, 'sine', 0.05);
+                setTimeout(() => this.playBeep(1320, 0.12, 'sine', 0.05), 80);
+            }
+        };
+
+        const gameState = {
+            playerName: 'Alex',
+            day: 1,
+            month: 1,
+            year: 2026,
+            gameSpeed: 1, // 0 = paused, 1 = normal, 2 = fast, 4 = ultra
+            speedBeforeModal: 1,
+            timerId: null,
+            cash: 150,
+            cardDebt: 800,
+            emergencyFund: 0,
+            investments: 0,
+            health: 60,
+            happiness: 50,
+            eduLevel: 1,
+            currentJobId: 'job_dogs',
+            currentHousingId: 'house_tent',
+            hasGym: false,
+            purchasedAssets: [],
+            completedModules: []
+        };
+
+        const JOBS = [
+            { id: 'job_dogs', title: 'Paseador de Perros', income: 300, reqModuleId: null, reqCourseName: 'Ninguno', reqHealth: 20, desc: 'Trabajo informal básico sin requisitos.' },
+            { id: 'job_cashier', title: 'Cajero de Supermercado', income: 650, reqModuleId: 'mod_1', reqCourseName: 'Curso 1: El Peligro del Interés', reqHealth: 40, desc: 'Ingreso estable con horario completo.' },
+            { id: 'job_tech', title: 'Soporte Técnico Junior', income: 1200, reqModuleId: 'mod_2', reqCourseName: 'Curso 2: Fondo de Emergencia', reqHealth: 50, desc: 'Requiere aprobar el Módulo 2.' },
+            { id: 'job_manager', title: 'Administrador de Proyectos', income: 2400, reqModuleId: 'mod_3', reqCourseName: 'Curso 3: Interés Compuesto', reqHealth: 60, desc: 'Requiere aprobar el Módulo 3.' },
+            { id: 'job_director', title: 'Director Financiero / Emprendedor', income: 4500, reqModuleId: 'ALL', reqCourseName: 'Todos los Cursos Completos', reqHealth: 70, desc: 'Debes haber completado todos los cursos.' }
+        ];
+
+        const HOUSING = [
+            { id: 'house_tent', title: 'Carpa / Refugio', cost: 0, healthEffect: -5, happyEffect: -5, desc: 'Gratis pero deteriora tu salud rápidamente.' },
+            { id: 'house_room', title: 'Cuarto Compartido', cost: 200, healthEffect: 2, happyEffect: 2, desc: 'Techo seguro y servicios básicos.' },
+            { id: 'house_apt', title: 'Departamento Modesto', cost: 500, healthEffect: 5, happyEffect: 5, desc: 'Comodidad y tranquilidad aceptables.' },
+            { id: 'house_condo', title: 'Condominio Moderno', cost: 1100, healthEffect: 10, happyEffect: 10, desc: 'Gran calidad de vida y seguridad.' }
+        ];
+
+        const FUTURE_PURCHASES = [
+            {
+                id: 'asset_laptop',
+                title: 'Laptop para Freelance',
+                cost: 350,
+                monthlyIncomeBoost: 120,
+                icon: 'fa-laptop',
+                desc: 'Te permite realizar trabajos remotos nocturnos (+ $120/mes ingresos pasivos).'
+            },
+            {
+                id: 'asset_bike',
+                title: 'Bicicleta / Moto de Entregas',
+                cost: 500,
+                monthlyIncomeBoost: 180,
+                icon: 'fa-bicycle',
+                desc: 'Te permite repartir pedidos en tu tiempo libre (+ $180/mes ingresos).'
+            },
+            {
+                id: 'asset_course_cert',
+                title: 'Diplomado Intensivo en Finanzas',
+                cost: 650,
+                eduLevelBoost: 1,
+                monthlyIncomeBoost: 0,
+                icon: 'fa-certificate',
+                desc: 'Otorga inmediatamente +1 Nivel Financiero para aspirar a mejores puestos de trabajo.'
+            },
+            {
+                id: 'asset_car',
+                title: 'Auto Usado para Transporte VIP',
+                cost: 2800,
+                monthlyIncomeBoost: 600,
+                icon: 'fa-car',
+                desc: 'Genera un flujo constante de pasajeros en horas de alto tráfico (+ $600/mes).'
+            },
+            {
+                id: 'asset_business',
+                title: 'Franquicia / Negocio Automatizado',
+                cost: 6500,
+                monthlyIncomeBoost: 1250,
+                icon: 'fa-store',
+                desc: 'Un pequeño negocio con empleados gestionados (+ $1,250/mes flujo pasivo).'
+            },
+            {
+                id: 'asset_property',
+                title: 'Departamento para Renta',
+                cost: 20000,
+                monthlyIncomeBoost: 3200,
+                icon: 'fa-building',
+                desc: 'Inmueble de alta demanda que incrementa enormemente tu patrimonio y flujo mensual (+ $3,200/mes).'
+            }
+        ];
+
+        const EDU_MODULES = [
+            {
+                id: 'mod_1',
+                title: '1. El Peligro del Interés de las Tarjetas',
+                rewardMoney: 100,
+                eduBoost: 1,
+                question: 'Tienes una deuda en tu tarjeta de crédito con 3.5% de interés mensual ($800) y $200 extras en efectivo. ¿Cuál es la mejor decisión?',
+                options: [
+                    { text: 'A) Guardar los $200 en el cajón por si acaso.', correct: false },
+                    { text: 'B) Pagar $200 a la tarjeta para reducir el interés cobrado.', correct: true },
+                    { text: 'C) Comprar ropa de marca en cuotas.', correct: false }
+                ],
+                explanation: '¡Exacto! El interés compuesto de la tarjeta (42% anual) destruye tu dinero. Reducir el saldo es la mejor inversión garantizada.'
+            },
+            {
+                id: 'mod_2',
+                title: '2. Regla del Fondo de Emergencia',
+                rewardMoney: 150,
+                eduBoost: 1,
+                question: '¿Para qué sirve principalmente un Fondo de Emergencia de 3 a 6 meses de gastos?',
+                options: [
+                    { text: 'A) Para gastarlo en vacaciones de fin de año.', correct: false },
+                    { text: 'B) Para invertirlo en acciones arriesgadas.', correct: false },
+                    { text: 'C) Evitar endeudarte ante despidos o imprevistos médicos.', correct: true }
+                ],
+                explanation: '¡Correcto! El fondo de emergencia es tu escudo protector para no caer en deudas cuando ocurren problemas.'
+            },
+            {
+                id: 'mod_3',
+                title: '3. La Magia del Interés Compuesto',
+                rewardMoney: 250,
+                eduBoost: 1,
+                question: '¿Qué es el interés compuesto a tu favor al invertir?',
+                options: [
+                    { text: 'A) Ganar intereses tanto de tu capital original como de los intereses acumulados.', correct: true },
+                    { text: 'B) Pagar una comisión doble al banco por mantener tu cuenta.', correct: false },
+                    { text: 'C) Pedir prestado a dos bancos a la vez.', correct: false }
+                ],
+                explanation: '¡Excelente! Hace crecer exponencialmente tu dinero con el tiempo.'
+            }
+        ];
+
+        const PERIODIC_OPPORTUNITIES = [
+            {
+                title: '¡Oferta de Herramienta de Trabajo Usada!',
+                desc: 'Un colega remata un equipo de trabajo por $180 en efectivo. Promete ayudarte a generar $60 más cada mes.',
+                options: [
+                    {
+                        text: 'Comprar equipo (-$180, +$60/mes futuro)',
+                        action: (s) => {
+                            if (s.cash >= 180) {
+                                s.cash -= 180;
+                                s.investments += 600;
+                                alertModal('¡Gran Decisión!', 'Compraste la herramienta. Tus rendimientos mensuales aumentaron.');
+                            } else {
+                                alertModal('Sin Fondos', 'No tenías suficiente efectivo para aprovechar la oportunidad.');
+                            }
+                        }
+                    },
+                    { text: 'Dejar pasar la oportunidad', action: (s) => {} }
+                ]
+            },
+            {
+                title: 'Curso Relámpago de Habilidades Digitales',
+                desc: 'Se abre un taller intensivo por $120 que aumentará inmediatamente tu Nivel de Capacitación Financiera.',
+                options: [
+                    {
+                        text: 'Pagar taller (-$120, +1 Nivel Edu)',
+                        action: (s) => {
+                            if (s.cash >= 120) {
+                                s.cash -= 120;
+                                s.eduLevel += 1;
+                                alertModal('¡Inversión en Educación!', 'Has subido tu Nivel Financiero. Ahora puedes aplicar a mejores trabajos.');
+                            } else {
+                                alertModal('Sin Efectivo', 'No cuentas con dinero suficiente.');
+                            }
+                        }
+                    },
+                    { text: 'Ignorar por ahora', action: (s) => {} }
+                ]
+            },
+            {
+                title: 'Invitación a Evento de Calidad de Vida',
+                desc: 'Tus amigos van a un retiro de fin de semana por $70. Subirá tu Ánimo y Salud en un +25%.',
+                options: [
+                    {
+                        text: 'Ir al retiro (-$70, +25% Salud y Ánimo)',
+                        action: (s) => {
+                            if (s.cash >= 70) {
+                                s.cash -= 70;
+                                s.health = Math.min(100, s.health + 25);
+                                s.happiness = Math.min(100, s.happiness + 25);
+                            } else {
+                                alertModal('Sin Fondos', 'No tienes suficiente efectivo disponible.');
+                            }
+                        }
+                    },
+                    { text: 'Quedarse descansando gratis (+5% Ánimo)', action: (s) => { s.happiness = Math.min(100, s.happiness + 5); } }
+                ]
+            }
+        ];
+
+        function setGameSpeed(speed) {
+            sfx.playClick();
+            gameState.gameSpeed = speed;
+            updateSpeedUI();
+            restartClockInterval();
+        }
+
+        function updateSpeedUI() {
+            document.querySelectorAll('.speed-btn').forEach(b => {
+                b.className = 'speed-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-200';
+            });
+            const activeBtn = document.getElementById(`speed-btn-${gameState.gameSpeed}`);
+            if (activeBtn) {
+                if (gameState.gameSpeed === 0) {
+                    activeBtn.className = 'speed-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500/20 text-amber-400 border border-amber-500/40';
+                } else {
+                    activeBtn.className = 'speed-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm';
+                }
+            }
+
+            const statusText = document.getElementById('clock-status-text');
+            if (gameState.gameSpeed === 0) {
+                statusText.textContent = 'En Pausa ⏸️';
+                statusText.className = 'text-xs font-mono font-bold text-amber-400 leading-tight';
+            } else if (gameState.gameSpeed === 1) {
+                statusText.textContent = '1 día / sec';
+                statusText.className = 'text-xs font-mono font-bold text-emerald-400 leading-tight';
+            } else if (gameState.gameSpeed === 2) {
+                statusText.textContent = '2 días / sec';
+                statusText.className = 'text-xs font-mono font-bold text-emerald-300 leading-tight';
+            } else {
+                statusText.textContent = '4 días / sec 🚀';
+                statusText.className = 'text-xs font-mono font-bold text-teal-300 leading-tight';
+            }
+        }
+
+        function restartClockInterval() {
+            if (gameState.timerId) clearInterval(gameState.timerId);
+
+            if (gameState.gameSpeed > 0) {
+                const intervalMs = 1000 / gameState.gameSpeed;
+                gameState.timerId = setInterval(() => {
+                    advanceDay();
+                }, intervalMs);
+            }
+        }
+
+        function advanceDay() {
+            gameState.day++;
+
+            if (gameState.day === 12 || gameState.day === 24) {
+                if (Math.random() < 0.6) {
+                    triggerPeriodicOpportunity();
+                }
+            }
+
+            if (gameState.day > 30) {
+                gameState.day = 1;
+                advanceMonth();
+            } else {
+                updateUI();
+                checkConditions();
+            }
+        }
+
+        function advanceMonth() {
+            sfx.playClick();
+
+            if (gameState.cardDebt > 0) {
+                const interest = Math.floor(gameState.cardDebt * 0.035);
+                gameState.cardDebt += interest;
+            }
+
+            if (gameState.hasGym) {
+                if (gameState.cash >= 35) {
+                    gameState.cash -= 35;
+                    gameState.health = Math.min(100, gameState.health + 5);
+                    gameState.happiness = Math.min(100, gameState.happiness + 5);
+                } else {
+                    gameState.hasGym = false;
+                }
+            }
+
+            const income = getMonthlyIncome();
+            const expenses = getMonthlyExpenses();
+            const netFlow = income - expenses;
+
+            gameState.cash += netFlow;
+
+            const hObj = HOUSING.find(i => i.id === gameState.currentHousingId);
+            let healthChange = hObj ? hObj.healthEffect : 0;
+            let happyChange = hObj ? hObj.happyEffect : 0;
+
+            if (gameState.cardDebt > 1000) happyChange -= 3;
+
+            gameState.health = Math.max(0, Math.min(100, gameState.health + healthChange));
+            gameState.happiness = Math.max(0, Math.min(100, gameState.happiness + happyChange));
+
+            gameState.month++;
+            if (gameState.month > 12) {
+                gameState.month = 1;
+                gameState.year++;
+            }
+
+            updateUI();
+            checkConditions();
+        }
+
+        function triggerPeriodicOpportunity() {
+            gameState.speedBeforeModal = gameState.gameSpeed;
+            setGameSpeed(0);
+
+            const opp = PERIODIC_OPPORTUNITIES[Math.floor(Math.random() * PERIODIC_OPPORTUNITIES.length)];
+            openModal(
+                'fa-rocket',
+                'bg-amber-500/20 text-amber-400 border-amber-500/30',
+                opp.title,
+                'Oportunidad de Futuro Inesperada',
+                opp.desc,
+                opp.options.map(opt => ({
+                    text: opt.text,
+                    class: 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700',
+                    onClick: () => {
+                        opt.action(gameState);
+                        closeModal();
+                        updateUI();
+                        checkConditions();
+                        setGameSpeed(gameState.speedBeforeModal);
+                    }
+                }))
+            );
+        }
+
+        function getNetWorth() {
+            let totalAssets = gameState.cash + gameState.emergencyFund + gameState.investments;
+            gameState.purchasedAssets.forEach(id => {
+                const item = FUTURE_PURCHASES.find(p => p.id === id);
+                if (item) totalAssets += item.cost;
+            });
+            return totalAssets - gameState.cardDebt;
+        }
+
+        function getMonthlyExpenses() {
+            const hObj = HOUSING.find(i => i.id === gameState.currentHousingId);
+            const housingCost = hObj ? hObj.cost : 0;
+            const gymCost = gameState.hasGym ? 35 : 0;
+            return housingCost + gymCost;
+        }
+
+        function getMonthlyIncome() {
+            const j = JOBS.find(item => item.id === gameState.currentJobId);
+            let baseSalary = j ? j.income : 0;
+
+            if (gameState.happiness >= 80) {
+                baseSalary = Math.floor(baseSalary * 1.10);
+            } else if (gameState.happiness <= 20) {
+                baseSalary = Math.floor(baseSalary * 0.80);
+            }
+
+            const investReturn = Math.floor(gameState.investments * 0.009);
+            const emergInterest = Math.floor(gameState.emergencyFund * 0.006);
+
+            let assetIncome = 0;
+            gameState.purchasedAssets.forEach(id => {
+                const item = FUTURE_PURCHASES.find(p => p.id === id);
+                if (item && item.monthlyIncomeBoost) assetIncome += item.monthlyIncomeBoost;
+            });
+
+            return baseSalary + investReturn + emergInterest + assetIncome;
+        }
+
+        function getMonthlyNetFlow() {
+            const cardInterest = Math.floor(gameState.cardDebt * 0.035);
+            return getMonthlyIncome() - getMonthlyExpenses() - cardInterest;
+        }
+
+        function healHealth(type) {
+            let cost = 0;
+            let boost = 0;
+            if (type === 'pharmacy') { cost = 20; boost = 15; }
+            if (type === 'doctor') { cost = 55; boost = 35; }
+            if (type === 'checkup') { cost = 130; boost = 70; }
+
+            if (gameState.cash < cost) {
+                sfx.playWarning();
+                alertModal("Sin Efectivo", "No tienes suficiente dinero para esta curación.");
+                return;
+            }
+
+            gameState.cash -= cost;
+            gameState.health = Math.min(100, gameState.health + boost);
+            sfx.playSuccess();
+            updateUI();
+        }
+
+        function boostMood(type) {
+            let cost = 0;
+            let boost = 0;
+            if (type === 'walk') { cost = 0; boost = 8; }
+            if (type === 'hobbies') { cost = 15; boost = 15; }
+            if (type === 'cinema') { cost = 35; boost = 25; }
+            if (type === 'therapy') { cost = 75; boost = 40; }
+            if (type === 'trip') { cost = 180; boost = 60; }
+
+            if (gameState.cash < cost) {
+                sfx.playWarning();
+                alertModal("Sin Efectivo", "No tienes suficiente dinero para realizar esta actividad de descanso.");
+                return;
+            }
+
+            gameState.cash -= cost;
+            gameState.happiness = Math.min(100, gameState.happiness + boost);
+            sfx.playSuccess();
+            updateUI();
+        }
+
+        function toggleGymSubscription() {
+            gameState.hasGym = !gameState.hasGym;
+            sfx.playClick();
+            updateUI();
+        }
+
+        function selectJob(jobId) {
+            const job = JOBS.find(j => j.id === jobId);
+            if (!job) return;
+
+            if (job.reqModuleId) {
+                if (job.reqModuleId === 'ALL') {
+                    if (gameState.completedModules.length < EDU_MODULES.length) {
+                        sfx.playWarning();
+                        alertModal("Cursos Incompletos", `Para ascender a ${job.title} debes completar TODOS los Cursos de la pestaña "Cursos".`);
+                        return;
+                    }
+                } else if (!gameState.completedModules.includes(job.reqModuleId)) {
+                    sfx.playWarning();
+                    alertModal("Curso Requerido Falta", `Para ascender a ${job.title} debes completar primero el '${job.reqCourseName}' en la pestaña "Cursos".`);
+                    return;
+                }
+            }
+
+            if (gameState.health < job.reqHealth) {
+                sfx.playWarning();
+                alertModal("Salud Insuficiente", `Necesitas al menos ${job.reqHealth}% de Salud para resistir la jornada laboral.`);
+                return;
+            }
+
+            gameState.currentJobId = jobId;
+            sfx.playSuccess();
+            updateUI();
+        }
+
+        function selectHousing(housingId) {
+            gameState.currentHousingId = housingId;
+            sfx.playClick();
+            updateUI();
+        }
+
+        function payDebt(amount) {
+            if (gameState.cardDebt <= 0) return;
+
+            let payAmount = 0;
+            if (amount === 'all') {
+                payAmount = Math.min(gameState.cash, gameState.cardDebt);
+            } else {
+                payAmount = Math.min(gameState.cash, amount, gameState.cardDebt);
+            }
+
+            if (payAmount <= 0) {
+                sfx.playWarning();
+                alertModal("Sin Efectivo", "No tienes efectivo suficiente para abonar.");
+                return;
+            }
+
+            gameState.cash -= payAmount;
+            gameState.cardDebt -= payAmount;
+            sfx.playMoney();
+            updateUI();
+        }
+
+        function depositEmergency(amount) {
+            if (gameState.cash < amount) {
+                sfx.playWarning();
+                alertModal("Sin Efectivo", "No tienes fondos suficientes en efectivo.");
+                return;
+            }
+
+            gameState.cash -= amount;
+            gameState.emergencyFund += amount;
+            sfx.playMoney();
+            updateUI();
+        }
+
+        function withdrawEmergency(amount) {
+            if (gameState.emergencyFund < amount) return;
+            gameState.emergencyFund -= amount;
+            gameState.cash += amount;
+            sfx.playClick();
+            updateUI();
+        }
+
+        function investMoney(amount) {
+            if (gameState.cardDebt > 0) {
+                sfx.playWarning();
+                alertModal("Alerta Asesora Sofía", "¡Atención! Invertir mientras debes dinero al 3.5% mensual es un error grave. ¡Paga tu tarjeta primero!");
+            }
+
+            if (gameState.cash < amount) {
+                sfx.playWarning();
+                return;
+            }
+
+            gameState.cash -= amount;
+            gameState.investments += amount;
+            sfx.playMoney();
+            updateUI();
+        }
+
+        function withdrawInvestment(amount) {
+            if (gameState.investments < amount) return;
+            gameState.investments -= amount;
+            gameState.cash += amount;
+            sfx.playClick();
+            updateUI();
+        }
+
+        function buyFutureAsset(assetId) {
+            const item = FUTURE_PURCHASES.find(p => p.id === assetId);
+            if (!item) return;
+            if (gameState.purchasedAssets.includes(assetId)) return;
+
+            if (gameState.cash < item.cost) {
+                sfx.playWarning();
+                alertModal("Sin Efectivo", `Necesitas $${item.cost.toLocaleString()} en efectivo para comprar ${item.title}.`);
+                return;
+            }
+
+            gameState.cash -= item.cost;
+            gameState.purchasedAssets.push(assetId);
+
+            if (item.eduLevelBoost) {
+                gameState.eduLevel += item.eduLevelBoost;
+            }
+
+            sfx.playSuccess();
+            updateUI();
+            checkConditions();
+        }
+
+        function openEducationModule(modId) {
+            const mod = EDU_MODULES.find(m => m.id === modId);
+            if (!mod) return;
+
+            gameState.speedBeforeModal = gameState.gameSpeed;
+            setGameSpeed(0);
+
+            openModal(
+                'fa-graduation-cap',
+                'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+                mod.title,
+                'Desafío FinanCity',
+                mod.question,
+                mod.options.map(opt => ({
+                    text: opt.text,
+                    class: 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-left',
+                    onClick: () => {
+                        closeModal();
+                        if (opt.correct) {
+                            sfx.playSuccess();
+                            if (!gameState.completedModules.includes(mod.id)) {
+                                gameState.completedModules.push(mod.id);
+                                gameState.cash += mod.rewardMoney;
+                                gameState.eduLevel += mod.eduBoost;
+                            }
+                            alertModal("¡Correcto!", `${mod.explanation}\n\nGanaste: +$${mod.rewardMoney} y +1 Nivel Financiero.`);
+                        } else {
+                            sfx.playWarning();
+                            alertModal("Incorrecto", "Revisa los conceptos y vuelve a intentarlo.");
+                        }
+                        updateUI();
+                        setGameSpeed(gameState.speedBeforeModal);
+                    }
+                }))
+            );
+        }
+
+        function startGameWithPlayerName(e) {
+            if (e) e.preventDefault();
+            const nameInput = document.getElementById('input-player-name').value.trim();
+            if (nameInput) gameState.playerName = nameInput;
+            document.getElementById('start-modal-overlay').classList.add('hidden');
+            sfx.playSuccess();
+            setGameSpeed(1);
+            updateUI();
+        }
+
+        function switchTab(tabName) {
+            sfx.playClick();
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.className = 'tab-btn py-2 rounded-lg flex flex-col items-center gap-1 transition-all text-slate-400 hover:text-slate-200';
+            });
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+
+            const activeBtn = document.getElementById(`tab-${tabName}`);
+            const activePanel = document.getElementById(`panel-${tabName}`);
+
+            if (activeBtn) activeBtn.className = 'tab-btn py-2 rounded-lg flex flex-col items-center gap-1 transition-all bg-emerald-600 text-white shadow-sm';
+            if (activePanel) activePanel.classList.remove('hidden');
+        }
+
+        function updateUI() {
+            document.getElementById('player-display-name').textContent = gameState.playerName || 'Jugador';
+
+            const monthsNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            document.getElementById('display-date-text').textContent = `Día ${gameState.day}, ${monthsNames[gameState.month - 1]} ${gameState.year}`;
+
+            document.getElementById('stat-cash').textContent = `$${gameState.cash.toLocaleString()}`;
+            
+            const netWorth = getNetWorth();
+            const netWorthEl = document.getElementById('stat-networth');
+            netWorthEl.textContent = `${netWorth >= 0 ? '$' : '-$'}${Math.abs(netWorth).toLocaleString()}`;
+            netWorthEl.className = `text-xs sm:text-sm font-bold font-mono leading-none ${netWorth >= 0 ? 'text-indigo-300' : 'text-red-400'}`;
+
+            document.getElementById('stat-health-num').textContent = `${gameState.health}%`;
+            document.getElementById('stat-health-bar').style.width = `${gameState.health}%`;
+
+            document.getElementById('stat-happy-num').textContent = `${gameState.happiness}%`;
+            document.getElementById('stat-happy-bar').style.width = `${gameState.happiness}%`;
+
+            const moodBadge = document.getElementById('mood-effect-badge');
+            if (moodBadge) {
+                if (gameState.happiness >= 80) {
+                    moodBadge.textContent = '¡Motivado! (+10% Ingresos)';
+                    moodBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                } else if (gameState.happiness <= 20) {
+                    moodBadge.textContent = '¡Desanimado! (-20% Ingresos)';
+                    moodBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse';
+                } else {
+                    moodBadge.textContent = 'Ánimo Normal';
+                    moodBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30';
+                }
+            }
+
+            const flow = getMonthlyNetFlow();
+            const flowEl = document.getElementById('stat-flow');
+            flowEl.textContent = `${flow >= 0 ? '+' : ''}$${flow}/m`;
+            flowEl.className = `font-mono font-bold text-xs ${flow >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+
+            const debtDot = document.getElementById('debt-alert-dot');
+            if (gameState.cardDebt > 0) debtDot.classList.remove('hidden');
+            else debtDot.classList.add('hidden');
+
+            document.getElementById('finance-card-debt').textContent = `$${gameState.cardDebt.toLocaleString()}`;
+            document.getElementById('finance-emergency-fund').textContent = `$${gameState.emergencyFund.toLocaleString()}`;
+            document.getElementById('finance-investments').textContent = `$${gameState.investments.toLocaleString()}`;
+
+            const btnGym = document.getElementById('btn-toggle-gym');
+            if (gameState.hasGym) {
+                btnGym.textContent = 'Cancelar (-$35/m)';
+                btnGym.className = 'px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold transition-all shadow';
+            } else {
+                btnGym.textContent = 'Suscribir (-$35/m)';
+                btnGym.className = 'px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all shadow';
+            }
+
+            const assistantText = document.getElementById('assistant-text');
+            const name = gameState.playerName || 'Jugador';
+            if (gameState.health < 35) {
+                assistantText.textContent = `¡Cuidado ${name}! Tu salud está muy baja (${gameState.health}%). Ve a la pestaña de Salud a curarte.`;
+            } else if (gameState.happiness < 25) {
+                assistantText.textContent = `¡Atención ${name}! Tu Ánimo está muy bajo (${gameState.happiness}%). Estás sufriendo un -20% en tus ingresos por desánimo.`;
+            } else if (gameState.cardDebt > 0) {
+                assistantText.textContent = `¡Atención ${name}! Deuda activa de $${gameState.cardDebt}. Líquidala antes de invertir.`;
+            } else if (gameState.purchasedAssets.length === 0) {
+                assistantText.textContent = `¡Buen trabajo! Ahora ingresa a la pestaña "Futuro" y adquiere tu primer activo.`;
+            } else {
+                assistantText.textContent = `¡Excelente camino, ${name}! Tu flujo mensual actual es de +$${getMonthlyIncome()}/mes.`;
+            }
+
+            renderStageVisuals();
+            renderJobsList();
+            renderHousingList();
+            renderFuturePurchasesList();
+            renderEducationModules();
+        }
+
+        function renderStageVisuals() {
+            const locEl = document.getElementById('stage-location');
+            const eduBadge = document.getElementById('edu-badge');
+            const shirt = document.getElementById('avatar-shirt');
+            const pants = document.getElementById('avatar-pants');
+            const accessory = document.getElementById('avatar-accessory');
+
+            eduBadge.textContent = `Lvl ${gameState.eduLevel} Financiero`;
+
+            if (gameState.currentHousingId === 'house_tent') {
+                locEl.innerHTML = `<i class="fa-solid fa-campground text-amber-500"></i> Viviendo en: Tienda / Calle`;
+                shirt.setAttribute('fill', '#64748b');
+                pants.setAttribute('fill', '#334155');
+                accessory.classList.add('hidden');
+            } else if (gameState.currentHousingId === 'house_room') {
+                locEl.innerHTML = `<i class="fa-solid fa-bed text-blue-400"></i> Viviendo en: Cuarto Compartido`;
+                shirt.setAttribute('fill', '#0284c7');
+                pants.setAttribute('fill', '#1e293b');
+                accessory.classList.add('hidden');
+            } else if (gameState.currentHousingId === 'house_apt') {
+                locEl.innerHTML = `<i class="fa-solid fa-building text-emerald-400"></i> Viviendo en: Departamento`;
+                shirt.setAttribute('fill', '#059669');
+                pants.setAttribute('fill', '#0f172a');
+                accessory.classList.add('hidden');
+            } else {
+                locEl.innerHTML = `<i class="fa-solid fa-city text-amber-400"></i> Viviendo en: Condominio Lujo`;
+                shirt.setAttribute('fill', '#4f46e5');
+                pants.setAttribute('fill', '#1e1b4b');
+                accessory.classList.remove('hidden');
+            }
+
+            const mouth = document.getElementById('avatar-mouth');
+            if (gameState.health < 30 || gameState.happiness < 30) {
+                mouth.setAttribute('d', 'M42 48 Q50 54 58 48');
+            } else {
+                mouth.setAttribute('d', 'M42 44 Q50 52 58 44');
+            }
+        }
+
+        function renderJobsList() {
+            const container = document.getElementById('jobs-list');
+            if (!container) return;
+            container.innerHTML = JOBS.map(j => {
+                const isCurrent = gameState.currentJobId === j.id;
+                
+                let coursePassed = true;
+                if (j.reqModuleId === 'ALL') {
+                    coursePassed = gameState.completedModules.length >= EDU_MODULES.length;
+                } else if (j.reqModuleId) {
+                    coursePassed = gameState.completedModules.includes(j.reqModuleId);
+                }
+
+                const canApply = coursePassed && gameState.health >= j.reqHealth;
+
+                return `
+                    <div class="p-2.5 rounded-xl border ${isCurrent ? 'bg-emerald-950/40 border-emerald-500/50' : 'bg-slate-800/40 border-slate-700/50'} flex justify-between items-center">
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-bold text-slate-200">${j.title}</span>
+                                ${isCurrent ? '<span class="bg-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0.2 rounded font-bold">ACTUAL</span>' : ''}
+                            </div>
+                            <p class="text-[10px] text-slate-400">${j.desc}</p>
+                            <p class="text-[9px] mt-0.5 ${coursePassed ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-bold'}">
+                                <i class="fa-solid ${coursePassed ? 'fa-circle-check' : 'fa-graduation-cap'}"></i> Req: ${j.reqCourseName}
+                            </p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="block text-xs font-mono font-bold text-emerald-400">+$${j.income}/m</span>
+                            ${!isCurrent ? `
+                                <button onclick="selectJob('${j.id}')" class="mt-1 px-2.5 py-1 rounded-lg text-[10px] font-bold ${canApply ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow' : 'bg-slate-700 text-slate-400 cursor-not-allowed'} transition-all">
+                                    Ascender
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHousingList() {
+            const container = document.getElementById('housing-list');
+            if (!container) return;
+            container.innerHTML = HOUSING.map(h => {
+                const isCurrent = gameState.currentHousingId === h.id;
+                return `
+                    <div class="p-2.5 rounded-xl border ${isCurrent ? 'bg-emerald-950/40 border-emerald-500/50' : 'bg-slate-800/40 border-slate-700/50'} flex justify-between items-center">
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-bold text-slate-200">${h.title}</span>
+                                ${isCurrent ? '<span class="bg-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0.2 rounded font-bold">ACTUAL</span>' : ''}
+                            </div>
+                            <p class="text-[10px] text-slate-400">${h.desc}</p>
+                            <p class="text-[9px] mt-0.5 text-slate-400">
+                                Efectos: ${h.healthEffect >= 0 ? '+' : ''}${h.healthEffect}% Salud, ${h.happyEffect >= 0 ? '+' : ''}${h.happyEffect}% Ánimo
+                            </p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="block text-xs font-mono font-bold text-amber-400">-$${h.cost}/m</span>
+                            ${!isCurrent ? `
+                                <button onclick="selectHousing('${h.id}')" class="mt-1 px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-[10px] font-bold transition-all">
+                                    Mudarse
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderFuturePurchasesList() {
+            const container = document.getElementById('future-purchases-list');
+            if (!container) return;
+            container.innerHTML = FUTURE_PURCHASES.map(item => {
+                const isBought = gameState.purchasedAssets.includes(item.id);
+
+                return `
+                    <div class="p-2.5 rounded-xl border ${isBought ? 'bg-amber-950/30 border-amber-500/40' : 'bg-slate-800/50 border-slate-700/60'} flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-sm shrink-0 border border-amber-500/20">
+                                <i class="fa-solid ${item.icon}"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1">
+                                    ${item.title}
+                                    ${isBought ? '<span class="text-[9px] bg-amber-500/20 text-amber-400 px-1.5 rounded">ADQUIRIDO</span>' : ''}
+                                </h4>
+                                <p class="text-[10px] text-slate-400">${item.desc}</p>
+                            </div>
+                        </div>
+
+                        <div class="text-right shrink-0">
+                            <span class="block text-xs font-mono font-bold text-slate-200 mb-1">$${item.cost.toLocaleString()}</span>
+                            ${!isBought ? `
+                                <button onclick="buyFutureAsset('${item.id}')" class="px-2.5 py-1 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white rounded-lg text-[10px] font-bold transition-all shadow">
+                                    Comprar
+                                </button>
+                            ` : `
+                                <span class="text-emerald-400 text-xs"><i class="fa-solid fa-circle-check"></i></span>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderEducationModules() {
+            const container = document.getElementById('education-modules');
+            if (!container) return;
+            container.innerHTML = EDU_MODULES.map(m => {
+                const isCompleted = gameState.completedModules.includes(m.id);
+
+                return `
+                    <div class="p-2.5 rounded-xl border ${isCompleted ? 'bg-emerald-950/30 border-emerald-500/40' : 'bg-slate-800/50 border-slate-700/60'} flex items-center justify-between">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-200">${m.title}</h4>
+                            <p class="text-[10px] text-slate-400">Recompensa: +$${m.rewardMoney} y +${m.eduBoost} Nivel Edu</p>
+                        </div>
+                        <button onclick="openEducationModule('${m.id}')" class="px-3 py-1.5 rounded-lg text-xs font-bold ${isCompleted ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30' : 'bg-emerald-600 hover:bg-emerald-500 text-white'} transition-all">
+                            ${isCompleted ? 'Repasar' : 'Completar'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openModal(icon, iconStyle, title, subtitle, bodyText, options = []) {
+            document.getElementById('modal-icon').className = `fa-solid ${icon}`;
+            document.getElementById('modal-icon-container').className = `w-10 h-10 rounded-xl flex items-center justify-center text-lg border shrink-0 ${iconStyle}`;
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-subtitle').textContent = subtitle;
+            document.getElementById('modal-body').textContent = bodyText;
+
+            const optsContainer = document.getElementById('modal-options');
+            optsContainer.innerHTML = '';
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = `w-full p-2.5 rounded-xl text-xs font-bold transition-all ${opt.class}`;
+                btn.textContent = opt.text;
+                btn.onclick = opt.onClick;
+                optsContainer.appendChild(btn);
+            });
+
+            document.getElementById('modal-overlay').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+        }
+
+        function alertModal(title, message) {
+            openModal(
+                'fa-circle-info',
+                'bg-blue-500/20 text-blue-400 border-blue-500/30',
+                title,
+                'Mensaje de FinanCity',
+                message,
+                [{
+                    text: 'Entendido',
+                    class: 'bg-emerald-600 hover:bg-emerald-500 text-white',
+                    onClick: closeModal
+                }]
+            );
+        }
+
+        function checkConditions() {
+            if (gameState.cash <= 0) {
+                setGameSpeed(0);
+                sfx.playWarning();
+                showEndModal(
+                    false,
+                    '¡BANCARROTA TOTAL!',
+                    `Te has quedado sin efectivo ($${gameState.cash}). No tienes fondos para cubrir tus gastos ni continuar. Mantén un fondo de emergencia en tu próximo intento.`,
+                    'fa-hand-holding-dollar text-red-500 bg-red-500/20 border border-red-500/40'
+                );
+                return;
+            }
+
+            if (gameState.health <= 0) {
+                setGameSpeed(0);
+                sfx.playWarning();
+                showEndModal(
+                    false,
+                    'Agotamiento Extremo',
+                    'Tu salud cayó a cero debido al descuido de tu bienestar. Recuerda que la salud es la base indispensable de la riqueza.',
+                    'fa-heart-crack text-red-500 bg-red-500/20 border border-red-500/40'
+                );
+                return;
+            }
+
+            const totalPassiveIncome = (gameState.investments * 0.009) + gameState.purchasedAssets.reduce((acc, id) => {
+                const item = FUTURE_PURCHASES.find(p => p.id === id);
+                return acc + (item ? item.monthlyIncomeBoost : 0);
+            }, 0);
+
+            const totalExpenses = getMonthlyExpenses();
+            const netWorth = getNetWorth();
+
+            if ((totalPassiveIncome >= totalExpenses && totalExpenses > 0 && gameState.cardDebt === 0) || netWorth >= 50000) {
+                setGameSpeed(0);
+                sfx.playSuccess();
+                showEndModal(
+                    true,
+                    '¡LIBERTAD FINANCIERA ALCANZADA!',
+                    `¡Felicitaciones, ${gameState.playerName}! Tus ingresos pasivos ($${Math.floor(totalPassiveIncome)}/mes) superan tus gastos mensuales. Has logrado salir de la carrera de la rata y construir tu futuro.`,
+                    'fa-trophy text-amber-400 bg-amber-500/20 border border-amber-500/40'
+                );
+            }
+        }
+
+        function showEndModal(isWin, title, message, iconClass) {
+            const monthsTotal = (gameState.year - 2026) * 12 + gameState.month;
+
+            document.getElementById('end-title').textContent = title;
+            document.getElementById('end-message').textContent = message;
+            document.getElementById('end-stat-months').textContent = `${monthsTotal} meses`;
+            document.getElementById('end-stat-networth').textContent = `$${getNetWorth().toLocaleString()}`;
+            document.getElementById('end-stat-debt').textContent = `$${gameState.cardDebt.toLocaleString()}`;
+
+            const iconContainer = document.getElementById('end-icon-bg');
+            iconContainer.className = `w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl ${iconClass}`;
+
+            document.getElementById('end-modal-overlay').classList.remove('hidden');
+        }
+
+        function resetGame() {
+            gameState.day = 1;
+            gameState.month = 1;
+            gameState.year = 2026;
+            gameState.cash = 150;
+            gameState.cardDebt = 800;
+            gameState.emergencyFund = 0;
+            gameState.investments = 0;
+            gameState.health = 60;
+            gameState.happiness = 50;
+            gameState.eduLevel = 1;
+            gameState.currentJobId = 'job_dogs';
+            gameState.currentHousingId = 'house_tent';
+            gameState.hasGym = false;
+            gameState.purchasedAssets = [];
+            gameState.completedModules = [];
+
+            document.getElementById('end-modal-overlay').classList.add('hidden');
+            document.getElementById('start-modal-overlay').classList.remove('hidden');
+        }
+
+        window.onload = function() {
+            updateUI();
+            updateSpeedUI();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Aqua Héroe - Misión La Paz</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:
+        linear-gradient(180deg,#041525,#075d80);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+}
+
+.game-container{
+    width:100%;
+    max-width:1150px;
+    padding:15px;
+}
+
+/* =========================
+   BARRA SUPERIOR
+========================= */
+
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+
+    background:#061c31;
+    padding:12px 18px;
+
+    border-radius:18px 18px 0 0;
+
+    border:2px solid rgba(255,255,255,.12);
+}
+
+.logo{
+    font-size:24px;
+    font-weight:bold;
+}
+
+.logo span{
+    color:#4bdfff;
+}
+
+.stats{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.stat{
+    background:#12344d;
+    padding:8px 12px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:bold;
+}
+
+/* =========================
+   ÁREA DE JUEGO
+========================= */
+
+#gameArea{
+
+    position:relative;
+
+    width:100%;
+    height:650px;
+
+    overflow:hidden;
+
+    border-radius:0 0 18px 18px;
+
+    background:
+
+        linear-gradient(
+            180deg,
+            #64dfff 0%,
+            #c9f5ff 32%,
+            #69bb65 32%,
+            #438847 58%,
+            #16759c 58%,
+            #0b4867 100%
+        );
+}
+
+/* Montañas */
+
+.mountains{
+
+    position:absolute;
+
+    top:95px;
+    left:0;
+
+    width:100%;
+    height:180px;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            transparent 38%,
+            #718795 39%,
+            #718795 54%,
+            transparent 55%
+        ) 0 100% / 320px 180px repeat-x;
+
+    opacity:.65;
+}
+
+/* Ciudad */
+
+.city{
+
+    position:absolute;
+
+    bottom:240px;
+    left:0;
+
+    width:100%;
+    height:130px;
+
+    display:flex;
+    justify-content:space-around;
+    align-items:flex-end;
+}
+
+.building{
+
+    width:45px;
+
+    background:#697c88;
+
+    border:2px solid #455b66;
+
+    position:relative;
+}
+
+.building:nth-child(1){height:75px}
+.building:nth-child(2){height:125px}
+.building:nth-child(3){height:60px}
+.building:nth-child(4){height:110px}
+.building:nth-child(5){height:85px}
+.building:nth-child(6){height:145px}
+.building:nth-child(7){height:95px}
+.building:nth-child(8){height:65px}
+
+.building::after{
+
+    content:"▦";
+
+    position:absolute;
+
+    top:8px;
+    left:8px;
+
+    font-size:24px;
+
+    color:#dff7ff;
+}
+
+/* =========================
+   JUGADOR
+========================= */
+
+#player{
+
+    position:absolute;
+
+    bottom:35px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+    width:80px;
+    height:90px;
+
+    background:#172e49;
+
+    border-radius:35px 35px 20px 20px;
+
+    border:3px solid #061a2e;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    font-size:48px;
+
+    z-index:20;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.45);
+
+    transition:transform .08s;
+}
+
+/* =========================
+   MISION
+========================= */
+
+.mission-box{
+
+    position:absolute;
+
+    top:18px;
+    left:18px;
+
+    width:325px;
+
+    background:rgba(4,25,45,.88);
+
+    padding:15px;
+
+    border-radius:15px;
+
+    z-index:30;
+
+    border:1px solid rgba(255,255,255,.15);
+
+    backdrop-filter:blur(5px);
+}
+
+.level-title{
+
+    color:#4de2ff;
+
+    font-size:20px;
+
+    margin-bottom:4px;
+}
+
+.mission-name{
+
+    font-size:17px;
+
+    font-weight:bold;
+
+    margin-bottom:5px;
+}
+
+.mission-text{
+
+    font-size:13px;
+
+    line-height:1.4;
+
+    color:#d7eef4;
+}
+
+.progress-container{
+
+    height:13px;
+
+    margin-top:10px;
+
+    background:#29465b;
+
+    border-radius:10px;
+
+    overflow:hidden;
+}
+
+#progress{
+
+    height:100%;
+
+    width:0%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #00dcff,
+            #53ff88
+        );
+
+    transition:width .25s;
+}
+
+/* =========================
+   MENSAJES
+========================= */
+
+.message{
+
+    position:absolute;
+
+    top:20px;
+    right:20px;
+
+    background:rgba(0,0,0,.7);
+
+    padding:12px 18px;
+
+    border-radius:10px;
+
+    font-weight:bold;
+
+    z-index:60;
+
+    display:none;
+}
+
+/* =========================
+   ITEMS
+========================= */
+
+.item{
+
+    position:absolute;
+
+    width:48px;
+    height:48px;
+
+    z-index:15;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    font-size:35px;
+
+    user-select:none;
+}
+
+/* =========================
+   CONTROLES
+========================= */
+
+.controls{
+
+    position:absolute;
+
+    bottom:15px;
+    left:15px;
+
+    z-index:30;
+
+    background:rgba(0,0,0,.45);
+
+    padding:9px 13px;
+
+    border-radius:10px;
+
+    font-size:13px;
+}
+
+.mobile-controls{
+
+    position:absolute;
+
+    bottom:15px;
+    right:15px;
+
+    display:flex;
+
+    gap:8px;
+
+    z-index:50;
+}
+
+.mobile-controls button{
+
+    width:55px;
+    height:55px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.85);
+
+    font-size:22px;
+
+    cursor:pointer;
+}
+
+/* =========================
+   OVERLAYS
+========================= */
+
+.overlay{
+
+    position:absolute;
+
+    inset:0;
+
+    background:rgba(2,15,28,.90);
+
+    z-index:100;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+}
+
+.menu-card{
+
+    width:92%;
+
+    max-width:560px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #0b3e5d,
+            #061d31
+        );
+
+    padding:35px;
+
+    border-radius:22px;
+
+    border:2px solid rgba(255,255,255,.16);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.55);
+}
+
+.menu-card h1{
+
+    color:#48e1ff;
+
+    font-size:40px;
+
+    margin-bottom:8px;
+}
+
+.menu-card h2{
+
+    color:#53ff90;
+
+    margin-bottom:10px;
+}
+
+.menu-card p{
+
+    color:#d5edf5;
+
+    line-height:1.6;
+
+    margin:15px 0 22px;
+}
+
+button.main-button{
+
+    border:none;
+
+    padding:14px 28px;
+
+    border-radius:12px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #00cfff,
+            #35ed8b
+        );
+
+    color:#032333;
+
+    font-weight:bold;
+
+    font-size:16px;
+
+    cursor:pointer;
+
+    transition:.15s;
+}
+
+button.main-button:hover{
+
+    transform:scale(1.05);
+}
+
+/* =========================
+   TEXTO FLOTANTE
+========================= */
+
+.float-text{
+
+    position:absolute;
+
+    z-index:80;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    pointer-events:none;
+
+    animation:floatUp .8s forwards;
+}
+
+@keyframes floatUp{
+
+    0%{
+
+        opacity:1;
+
+        transform:translateY(0);
+    }
+
+    100%{
+
+        opacity:0;
+
+        transform:translateY(-70px);
+    }
+}
+
+/* =========================
+   NIVEL
+========================= */
+
+.level-number{
+
+    color:#fff;
+
+    font-size:13px;
+
+    margin-bottom:3px;
+}
+
+@media(max-width:700px){
+
+    #gameArea{
+        height:620px;
+    }
+
+    .mission-box{
+        width:270px;
+    }
+
+    .stats{
+        font-size:11px;
+    }
+
+    .menu-card h1{
+        font-size:29px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="game-container">
+
+    <!-- =========================
+         BARRA
+    ========================== -->
+
+    <div class="top-bar">
+
+        <div class="logo">
+            💧 AQUA <span>HÉROE</span>
+        </div>
+
+        <div class="stats">
+
+            <div class="stat">
+                🏆 Puntos:
+                <span id="score">0</span>
+            </div>
+
+            <div class="stat">
+                💧 Agua:
+                <span id="water">0</span>L
+            </div>
+
+            <div class="stat">
+                ❤️ Vidas:
+                <span id="lives">3</span>
+            </div>
+
+            <div class="stat">
+                🎮 Nivel:
+                <span id="level">1</span>/10
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         JUEGO
+    ========================== -->
+
+    <div id="gameArea">
+
+        <div class="mountains"></div>
+
+        <div class="city">
+
+            <div class="building"></div>
+            <div class="building"></div>
+            <div class="building"></div>
+            <div class="building"></div>
+            <div class="building"></div>
+            <div class="building"></div>
+            <div class="building"></div>
+            <div class="building"></div>
+
+        </div>
+
+
+        <!-- MISIÓN -->
+
+        <div class="mission-box">
+
+            <div class="level-title">
+
+                💧 NIVEL
+                <span id="missionLevel">1</span>
+
+            </div>
+
+            <div class="mission-name"
+                 id="missionName">
+
+                Primeras gotas
+
+            </div>
+
+            <div class="mission-text"
+                 id="missionText">
+
+                Atrapa las gotas de agua.
+
+            </div>
+
+            <div class="progress-container">
+
+                <div id="progress"></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MENSAJE -->
+
+        <div id="message"
+             class="message">
+
+        </div>
+
+
+        <!-- JUGADOR -->
+
+        <div id="player">
+
+            🧑🏻
+
+        </div>
+
+
+        <!-- CONTROLES -->
+
+        <div class="controls">
+
+            ⬅ A / ←
+            &nbsp;&nbsp;&nbsp;
+            D / →
+
+        </div>
+
+
+        <div class="mobile-controls">
+
+            <button id="leftBtn">
+                ◀
+            </button>
+
+            <button id="rightBtn">
+                ▶
+            </button>
+
+        </div>
+
+
+        <!-- =========================
+             PANTALLA INICIO
+        ========================== -->
+
+        <div class="overlay"
+             id="startScreen">
+
+            <div class="menu-card">
+
+                <h1>
+                    💧 AQUA HÉROE
+                </h1>
+
+                <h2>
+                    🌆 Misión La Paz
+                </h2>
+
+                <p>
+
+                    Completa <strong>10 niveles</strong>,
+                    supera misiones cada vez más difíciles,
+                    ahorra agua y convierte a La Paz en una
+                    ciudad más sostenible.
+
+                    <br><br>
+
+                    Atrapa 💧 gotas y 🌊 bonus.
+                    Evita 🗑️ basura y ⚠️ fugas.
+
+                </p>
+
+                <button class="main-button"
+                        id="startBtn">
+
+                    🚀 COMENZAR
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             NIVEL COMPLETADO
+        ========================== -->
+
+        <div class="overlay"
+             id="levelScreen"
+             style="display:none">
+
+            <div class="menu-card">
+
+                <h1>
+                    🏆 ¡NIVEL COMPLETADO!
+                </h1>
+
+                <h2>
+
+                    Nivel
+                    <span id="completedLevel">
+                        1
+                    </span>
+
+                </h2>
+
+                <p>
+
+                    Has ayudado a ahorrar
+
+                    <strong>
+                        <span id="levelWater">
+                            0
+                        </span> litros
+                    </strong>
+
+                    de agua.
+
+                    <br><br>
+
+                    Puntos obtenidos:
+
+                    <strong>
+                        <span id="levelScore">
+                            0
+                        </span>
+                    </strong>
+
+                </p>
+
+                <button class="main-button"
+                        id="nextLevelBtn">
+
+                    ➡ SIGUIENTE NIVEL
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             GANAR
+        ========================== -->
+
+        <div class="overlay"
+             id="winScreen"
+             style="display:none">
+
+            <div class="menu-card">
+
+                <h1>
+                    🌎 ¡ERES UN GUARDIÁN DEL AGUA!
+                </h1>
+
+                <p>
+
+                    ¡Completaste los 10 niveles!
+
+                    <br><br>
+
+                    💧 Agua ahorrada:
+                    <strong>
+                        <span id="winWater">
+                            0
+                        </span>L
+                    </strong>
+
+                    <br>
+
+                    🏆 Puntuación:
+                    <strong>
+                        <span id="winScore">
+                            0
+                        </span>
+                    </strong>
+
+                </p>
+
+                <button class="main-button"
+                        id="restartWinBtn">
+
+                    🔄 JUGAR DE NUEVO
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             GAME OVER
+        ========================== -->
+
+        <div class="overlay"
+             id="gameOverScreen"
+             style="display:none">
+
+            <div class="menu-card">
+
+                <h1>
+                    💥 FIN DE LA PARTIDA
+                </h1>
+
+                <h2 id="gameOverTitle">
+                    La ciudad necesita otro héroe.
+                </h2>
+
+                <p>
+
+                    🏆 Puntos:
+                    <strong>
+                        <span id="finalScore">
+                            0
+                        </span>
+                    </strong>
+
+                    <br>
+
+                    💧 Agua ahorrada:
+                    <strong>
+                        <span id="finalWater">
+                            0
+                        </span>L
+                    </strong>
+
+                    <br>
+
+                    🎮 Nivel alcanzado:
+                    <strong>
+                        <span id="finalLevel">
+                            1
+                        </span>
+                    </strong>
+
+                </p>
+
+                <button class="main-button"
+                        id="restartBtn">
+
+                    🔄 INTENTAR DE NUEVO
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ======================================================
+   ELEMENTOS
+====================================================== */
+
+const gameArea =
+    document.getElementById("gameArea");
+
+const player =
+    document.getElementById("player");
+
+const scoreElement =
+    document.getElementById("score");
+
+const waterElement =
+    document.getElementById("water");
+
+const livesElement =
+    document.getElementById("lives");
+
+const levelElement =
+    document.getElementById("level");
+
+const missionLevel =
+    document.getElementById("missionLevel");
+
+const missionName =
+    document.getElementById("missionName");
+
+const missionText =
+    document.getElementById("missionText");
+
+const progress =
+    document.getElementById("progress");
+
+const message =
+    document.getElementById("message");
+
+const startScreen =
+    document.getElementById("startScreen");
+
+const levelScreen =
+    document.getElementById("levelScreen");
+
+const gameOverScreen =
+    document.getElementById("gameOverScreen");
+
+const winScreen =
+    document.getElementById("winScreen");
+
+
+/* ======================================================
+   ESTADO DEL JUEGO
+====================================================== */
+
+let score = 0;
+let water = 0;
+
+let lives = 3;
+
+let level = 1;
+
+let missionProgress = 0;
+
+let playerX = 50;
+
+let gameRunning = false;
+
+let spawnTimer;
+
+let animation;
+
+let speed = 3;
+
+let spawnRate = 700;
+
+
+/* ======================================================
+   DEFINICIÓN DE LOS 10 NIVELES
+====================================================== */
+
+const levels = [
+
+    {
+        name:"Primeras gotas",
+
+        text:"Atrapa 10 gotas de agua.",
+
+        target:10,
+
+        type:"drops",
+
+        speed:3,
+
+        spawn:700,
+
+        lives:3
+    },
+
+    {
+        name:"Cazador de agua",
+
+        text:"Atrapa 15 gotas y acumula 75 litros.",
+
+        target:15,
+
+        type:"drops",
+
+        speed:3.4,
+
+        spawn:650,
+
+        lives:3
+    },
+
+    {
+        name:"¡Cuidado con la basura!",
+
+        text:"Atrapa 18 gotas evitando la basura.",
+
+        target:18,
+
+        type:"clean",
+
+        speed:3.8,
+
+        spawn:610,
+
+        lives:3
+    },
+
+    {
+        name:"Detective de fugas",
+
+        text:"Consigue 20 gotas y evita las fugas 💦.",
+
+        target:20,
+
+        type:"leaks",
+
+        speed:4.2,
+
+        spawn:560,
+
+        lives:3
+    },
+
+    {
+        name:"Hora de ahorrar",
+
+        text:"Consigue 25 gotas para demostrar que sabes ahorrar.",
+
+        target:25,
+
+        type:"drops",
+
+        speed:4.6,
+
+        spawn:530,
+
+        lives:3
+    },
+
+    {
+        name:"Contaminación urbana",
+
+        text:"Atrapa 28 gotas sin tocar más de 5 residuos.",
+
+        target:28,
+
+        type:"trash",
+
+        speed:5,
+
+        spawn:500,
+
+        lives:3
+    },
+
+    {
+        name:"La ciudad depende de ti",
+
+        text:"Consigue 32 gotas y recoge 2 bonus 🌊.",
+
+        target:32,
+
+        type:"bonus",
+
+        speed:5.4,
+
+        spawn:470,
+
+        lives:3
+    },
+
+    {
+        name:"Crisis hídrica",
+
+        text:"Consigue 36 gotas con solo 2 vidas.",
+
+        target:36,
+
+        type:"hard",
+
+        speed:5.8,
+
+        spawn:440,
+
+        lives:2
+    },
+
+    {
+        name:"Guardián de La Paz",
+
+        text:"Consigue 40 gotas y recoge 3 bonus.",
+
+        target:40,
+
+        type:"bonus",
+
+        speed:6.2,
+
+        spawn:410,
+
+        lives:2
+    },
+
+    {
+        name:"💧 MAESTRO DEL AGUA",
+
+        text:"¡Supera el desafío final! Consigue 50 gotas.",
+
+        target:50,
+
+        type:"final",
+
+        speed:6.8,
+
+        spawn:370,
+
+        lives:2
+    }
+
+];
+
+
+/* ======================================================
+   INICIAR PARTIDA
+====================================================== */
+
+function startGame(){
+
+    score = 0;
+
+    water = 0;
+
+    level = 1;
+
+    playerX = 50;
+
+    updateStats();
+
+    startScreen.style.display = "none";
+
+    winScreen.style.display = "none";
+
+    gameOverScreen.style.display = "none";
+
+    loadLevel();
+
+}
+
+
+/* ======================================================
+   CARGAR NIVEL
+====================================================== */
+
+function loadLevel(){
+
+    gameRunning = true;
+
+    const current =
+        levels[level - 1];
+
+    missionProgress = 0;
+
+    speed = current.speed;
+
+    spawnRate = current.spawn;
+
+    lives = current.lives;
+
+    updateStats();
+
+    updateMission();
+
+    clearItems();
+
+    startSpawn();
+
+    animation =
+        requestAnimationFrame(gameLoop);
+
+    showMessage(
+        "🎮 ¡Nivel " + level + "!"
+    );
+
+}
+
+
+/* ======================================================
+   CONFIGURAR MISIÓN
+====================================================== */
+
+function updateMission(){
+
+    const current =
+        levels[level - 1];
+
+    missionLevel.textContent =
+        level;
+
+    levelElement.textContent =
+        level;
+
+    missionName.textContent =
+        current.name;
+
+    missionText.textContent =
+        current.text;
+
+    const percent =
+        (missionProgress / current.target) * 100;
+
+    progress.style.width =
+        Math.min(percent,100) + "%";
+
+}
+
+
+/* ======================================================
+   SPAWN
+====================================================== */
+
+function startSpawn(){
+
+    clearInterval(spawnTimer);
+
+    spawnTimer = setInterval(
+
+        spawnItem,
+
+        spawnRate
+
+    );
+
+}
+
+
+/* ======================================================
+   CREAR OBJETOS
+====================================================== */
+
+function spawnItem(){
+
+    if(!gameRunning)
+        return;
+
+    const current =
+        levels[level - 1];
+
+    const item =
+        document.createElement("div");
+
+    item.classList.add("item");
+
+    const random =
+        Math.random();
+
+    let type;
+
+    /*
+       PROBABILIDADES
+    */
+
+    if(random < 0.55){
+
+        type = "drop";
+
+        item.textContent = "💧";
+
+    }
+
+    else if(
+        current.type === "bonus" &&
+        random < 0.68
+    ){
+
+        type = "bonus";
+
+        item.textContent = "🌊";
+
+    }
+
+    else if(
+        current.type === "leaks" &&
+        random < 0.72
+    ){
+
+        type = "leak";
+
+        item.textContent = "💦";
+
+    }
+
+    else if(
+        current.type === "hard" &&
+        random < 0.75
+    ){
+
+        type = "trash";
+
+        item.textContent =
+            ["🗑️","🧴","🥫","🛢️"]
+            [Math.floor(Math.random()*4)];
+
+    }
+
+    else if(random < 0.88){
+
+        type = "trash";
+
+        item.textContent =
+            ["🗑️","🧴","🥫"]
+            [Math.floor(Math.random()*3)];
+
+    }
+
+    else{
+
+        type = "drop";
+
+        item.textContent = "💧";
+
+    }
+
+
+    item.dataset.type =
+        type;
+
+
+    const width =
+        gameArea.clientWidth;
+
+    const x =
+        Math.random() *
+        (width - 55);
+
+
+    item.style.left =
+        x + "px";
+
+    item.style.top =
+        "-60px";
+
+
+    gameArea.appendChild(item);
+
+}
+
+
+/* ======================================================
+   LOOP PRINCIPAL
+====================================================== */
+
+function gameLoop(){
+
+    if(!gameRunning)
+        return;
+
+
+    movePlayer();
+
+
+    const items =
+        document.querySelectorAll(".item");
+
+
+    items.forEach(item => {
+
+        let y =
+            parseFloat(item.style.top);
+
+        y += speed;
+
+        item.style.top =
+            y + "px";
+
+
+        /*
+           COLISIÓN
+        */
+
+        if(collision(item,player)){
+
+            collectItem(item);
+
+            return;
+
+        }
+
+
+        /*
+           OBJETO PASÓ
+        */
+
+        if(y > gameArea.clientHeight){
+
+            if(
+                item.dataset.type === "drop" ||
+                item.dataset.type === "bonus"
+            ){
+
+                /*
+                   Perder gotas también
+                   genera dificultad.
+                */
+
+                loseLife();
+
+            }
+
+            item.remove();
+
+        }
+
+    });
+
+
+    animation =
+        requestAnimationFrame(gameLoop);
+
+}
+
+
+/* ======================================================
+   MOVIMIENTO
+====================================================== */
+
+const keys = {
+
+    left:false,
+
+    right:false
+
+};
+
+
+function movePlayer(){
+
+    if(keys.left){
+
+        playerX -= 0.9;
+
+    }
+
+    if(keys.right){
+
+        playerX += 0.9;
+
+    }
+
+
+    if(playerX < 5)
+        playerX = 5;
+
+    if(playerX > 95)
+        playerX = 95;
+
+
+    player.style.left =
+        playerX + "%";
+
+}
+
+
+/* ======================================================
+   COLISIÓN
+====================================================== */
+
+function collision(a,b){
+
+    const r1 =
+        a.getBoundingClientRect();
+
+    const r2 =
+        b.getBoundingClientRect();
+
+
+    return !(
+        r1.right < r2.left ||
+        r1.left > r2.right ||
+        r1.bottom < r2.top ||
+        r1.top > r2.bottom
+    );
+
+}
+
+
+/* ======================================================
+   RECOGER OBJETO
+====================================================== */
+
+function collectItem(item){
+
+    const type =
+        item.dataset.type;
+
+
+    const x =
+        item.offsetLeft;
+
+    const y =
+        item.offsetTop;
+
+
+    item.remove();
+
+
+    /*
+       GOTA NORMAL
+    */
+
+    if(type === "drop"){
+
+        score += 50;
+
+        water += 5;
+
+        missionProgress++;
+
+        createFloatText(
+            x,
+            y,
+            "+5 L"
+        );
+
+        showMessage(
+            "💧 +5 litros"
+        );
+
+    }
+
+
+    /*
+       BONUS
+    */
+
+    else if(type === "bonus"){
+
+        score += 150;
+
+        water += 20;
+
+        missionProgress++;
+
+        createFloatText(
+            x,
+            y,
+            "+20 L"
+        );
+
+        showMessage(
+            "🌊 ¡BONUS +20 L!"
+        );
+
+    }
+
+
+    /*
+       BASURA
+    */
+
+    else if(type === "trash"){
+
+        score -= 50;
+
+        if(score < 0)
+            score = 0;
+
+
+        lives--;
+
+
+        showMessage(
+            "🗑️ ¡Contaminación!"
+        );
+
+    }
+
+
+    /*
+       FUGA
+    */
+
+    else if(type === "leak"){
+
+        score -= 70;
+
+        lives--;
+
+        showMessage(
+            "💦 ¡No reparaste la fuga!"
+        );
+
+    }
+
+
+    updateStats();
+
+    updateMission();
+
+
+    /*
+       COMPROBAR NIVEL
+    */
+
+    checkMission();
+
+}
+
+
+/* ======================================================
+   COMPROBAR MISIÓN
+====================================================== */
+
+function checkMission(){
+
+    const current =
+        levels[level - 1];
+
+
+    if(
+        missionProgress >=
+        current.target
+    ){
+
+        completeLevel();
+
+    }
+
+
+    if(lives <= 0){
+
+        endGame();
+
+    }
+
+}
+
+
+/* ======================================================
+   COMPLETAR NIVEL
+====================================================== */
+
+function completeLevel(){
+
+    gameRunning = false;
+
+    clearInterval(spawnTimer);
+
+    cancelAnimationFrame(animation);
+
+    clearItems();
+
+
+    /*
+       BONUS POR COMPLETAR NIVEL
+    */
+
+    const bonus =
+        level * 250;
+
+    score += bonus;
+
+
+    document.getElementById(
+        "completedLevel"
+    ).textContent =
+        level;
+
+    document.getElementById(
+        "levelWater"
+    ).textContent =
+        water;
+
+    document.getElementById(
+        "levelScore"
+    ).textContent =
+        score;
+
+
+    levelScreen.style.display =
+        "flex";
+
+
+    /*
+       SI TERMINÓ LOS 10
+    */
+
+    if(level >= 10){
+
+        setTimeout(
+            finishGame,
+            300
+        );
+
+    }
+
+}
+
+
+/* ======================================================
+   SIGUIENTE NIVEL
+====================================================== */
+
+function nextLevel(){
+
+    level++;
+
+    levelScreen.style.display =
+        "none";
+
+    if(level > 10){
+
+        finishGame();
+
+        return;
+
+    }
+
+    loadLevel();
+
+}
+
+
+/* ======================================================
+   FINAL DEL JUEGO
+====================================================== */
+
+function finishGame(){
+
+    gameRunning = false;
+
+    clearInterval(spawnTimer);
+
+    cancelAnimationFrame(animation);
+
+    clearItems();
+
+
+    document.getElementById(
+        "winScore"
+    ).textContent =
+        score;
+
+    document.getElementById(
+        "winWater"
+    ).textContent =
+        water;
+
+
+    levelScreen.style.display =
+        "none";
+
+    winScreen.style.display =
+        "flex";
+
+}
+
+
+/* ======================================================
+   GAME OVER
+====================================================== */
+
+function endGame(){
+
+    gameRunning = false;
+
+    clearInterval(spawnTimer);
+
+    cancelAnimationFrame(animation);
+
+    clearItems();
+
+
+    document.getElementById(
+        "finalScore"
+    ).textContent =
+        score;
+
+    document.getElementById(
+        "finalWater"
+    ).textContent =
+        water;
+
+    document.getElementById(
+        "finalLevel"
+    ).textContent =
+        level;
+
+
+    if(level >= 8){
+
+        document.getElementById(
+            "gameOverTitle"
+        ).textContent =
+            "🔥 ¡Estuviste muy cerca del final!";
+
+    }
+
+    else{
+
+        document.getElementById(
+            "gameOverTitle"
+        ).textContent =
+            "💧 La ciudad necesita otro héroe.";
+
+    }
+
+
+    gameOverScreen.style.display =
+        "flex";
+
+}
+
+
+/* ======================================================
+   VIDAS
+====================================================== */
+
+function loseLife(){
+
+    lives--;
+
+    updateStats();
+
+    showMessage(
+        "⚠️ ¡Perdiste una vida!"
+    );
+
+
+    if(lives <= 0){
+
+        endGame();
+
+    }
+
+}
+
+
+/* ======================================================
+   ESTADÍSTICAS
+====================================================== */
+
+function updateStats(){
+
+    scoreElement.textContent =
+        score;
+
+    waterElement.textContent =
+        water;
+
+    livesElement.textContent =
+        lives;
+
+    levelElement.textContent =
+        level;
+
+}
+
+
+/* ======================================================
+   LIMPIAR OBJETOS
+====================================================== */
+
+function clearItems(){
+
+    document
+        .querySelectorAll(".item")
+        .forEach(
+            item => item.remove()
+        );
+
+}
+
+
+/* ======================================================
+   MENSAJES
+====================================================== */
+
+let messageTimer;
+
+
+function showMessage(text){
+
+    message.textContent =
+        text;
+
+    message.style.display =
+        "block";
+
+
+    clearTimeout(
+        messageTimer
+    );
+
+
+    messageTimer =
+        setTimeout(
+            () => {
+
+                message.style.display =
+                    "none";
+
+            },
+            1200
+        );
+
+}
+
+
+/* ======================================================
+   TEXTO FLOTANTE
+====================================================== */
+
+function createFloatText(
+    x,
+    y,
+    text
+){
+
+    const element =
+        document.createElement("div");
+
+    element.className =
+        "float-text";
+
+    element.textContent =
+        text;
+
+    element.style.left =
+        x + "px";
+
+    element.style.top =
+        y + "px";
+
+
+    gameArea.appendChild(
+        element
+    );
+
+
+    setTimeout(
+        () => element.remove(),
+        800
+    );
+
+}
+
+
+/* ======================================================
+   TECLADO
+====================================================== */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(
+            event.key === "ArrowLeft" ||
+            event.key.toLowerCase() === "a"
+        ){
+
+            keys.left = true;
+
+        }
+
+
+        if(
+            event.key === "ArrowRight" ||
+            event.key.toLowerCase() === "d"
+        ){
+
+            keys.right = true;
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    event => {
+
+        if(
+            event.key === "ArrowLeft" ||
+            event.key.toLowerCase() === "a"
+        ){
+
+            keys.left = false;
+
+        }
+
+
+        if(
+            event.key === "ArrowRight" ||
+            event.key.toLowerCase() === "d"
+        ){
+
+            keys.right = false;
+
+        }
+
+    }
+);
+
+
+/* ======================================================
+   CONTROLES MÓVILES
+====================================================== */
+
+const leftBtn =
+    document.getElementById(
+        "leftBtn"
+    );
+
+const rightBtn =
+    document.getElementById(
+        "rightBtn"
+    );
+
+
+leftBtn.addEventListener(
+    "mousedown",
+    () => keys.left = true
+);
+
+leftBtn.addEventListener(
+    "mouseup",
+    () => keys.left = false
+);
+
+leftBtn.addEventListener(
+    "mouseleave",
+    () => keys.left = false
+);
+
+
+rightBtn.addEventListener(
+    "mousedown",
+    () => keys.right = true
+);
+
+rightBtn.addEventListener(
+    "mouseup",
+    () => keys.right = false
+);
+
+rightBtn.addEventListener(
+    "mouseleave",
+    () => keys.right = false
+);
+
+
+/* Touch */
+
+leftBtn.addEventListener(
+    "touchstart",
+    event => {
+
+        event.preventDefault();
+
+        keys.left = true;
+
+    }
+);
+
+leftBtn.addEventListener(
+    "touchend",
+    event => {
+
+        event.preventDefault();
+
+        keys.left = false;
+
+    }
+);
+
+
+rightBtn.addEventListener(
+    "touchstart",
+    event => {
+
+        event.preventDefault();
+
+        keys.right = true;
+
+    }
+);
+
+rightBtn.addEventListener(
+    "touchend",
+    event => {
+
+        event.preventDefault();
+
+        keys.right = false;
+
+    }
+);
+
+
+/* ======================================================
+   BOTONES
+====================================================== */
+
+document
+    .getElementById("startBtn")
+    .addEventListener(
+        "click",
+        startGame
+    );
+
+
+document
+    .getElementById("nextLevelBtn")
+    .addEventListener(
+        "click",
+        nextLevel
+    );
+
+
+document
+    .getElementById("restartBtn")
+    .addEventListener(
+        "click",
+        startGame
+    );
+
+
+document
+    .getElementById("restartWinBtn")
+    .addEventListener(
+        "click",
+        startGame
+    );
+
+</script>
+
+</body>
+</html>

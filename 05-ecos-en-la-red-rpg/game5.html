@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Ecos en la Red RPG</title>
+
+<style>
+
+body{
+    margin:0;
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    font-family:monospace;
+}
+
+canvas{
+    border:4px solid white;
+}
+
+button{
+
+    position:absolute;
+    top:70%;
+    padding:15px 30px;
+    font-size:18px;
+    display:none;
+    cursor:pointer;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<canvas id="game" width="800" height="500"></canvas>
+
+<button id="reiniciar" onclick="reiniciarJuego()">
+Comenzar de nuevo
+</button>
+
+
+<script>
+
+
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+const boton=document.getElementById("reiniciar");
+
+
+let player;
+let npc;
+let keys={};
+
+let texto="";
+let escena="";
+let empatia=50;
+
+
+
+function iniciar(){
+
+
+player={
+
+x:120,
+y:250,
+speed:4
+
+};
+
+
+npc={
+
+x:600,
+y:250
+
+};
+
+
+texto="";
+
+escena="inicio";
+
+empatia=50;
+
+boton.style.display="none";
+
+
+}
+
+
+
+document.addEventListener("keydown",e=>{
+
+
+keys[e.key.toLowerCase()]=true;
+
+
+
+if(escena=="decidir"){
+
+
+if(e.key=="1"){
+
+empatia+=30;
+
+texto=
+"NICOLÁS:\n"+
+"Decide ayudar a Valeria.\n"+
+"Denuncia el contenido y la apoya.";
+
+escena="bueno";
+
+}
+
+
+if(e.key=="2"){
+
+empatia-=30;
+
+texto=
+"NICOLÁS:\n"+
+"Ignora el problema.\n"+
+"El daño continúa creciendo.";
+
+escena="malo";
+
+}
+
+
+}
+
+
+
+});
+
+
+
+document.addEventListener("keyup",e=>{
+
+keys[e.key.toLowerCase()]=false;
+
+});
+
+
+
+
+
+function mover(){
+
+
+if(escena!="inicio")
+return;
+
+
+if(keys["w"])
+player.y-=player.speed;
+
+if(keys["s"])
+player.y+=player.speed;
+
+if(keys["a"])
+player.x-=player.speed;
+
+if(keys["d"])
+player.x+=player.speed;
+
+
+}
+
+
+
+function dibujarPersonaje(x,y,tipo){
+
+
+ctx.save();
+
+
+// cabeza
+
+ctx.fillStyle="#f5cfa0";
+
+ctx.beginPath();
+
+ctx.arc(
+x,
+y-25,
+18,
+0,
+Math.PI*2
+);
+
+ctx.fill();
+
+
+// cabello
+
+ctx.fillStyle=
+tipo=="nicolas"?"#111":"#4b2e20";
+
+
+ctx.beginPath();
+
+ctx.arc(
+x,
+y-32,
+18,
+Math.PI,
+Math.PI*2
+);
+
+ctx.fill();
+
+
+// cuerpo
+
+ctx.fillStyle=
+tipo=="nicolas"?"#2563eb":"#ec4899";
+
+
+ctx.fillRect(
+x-15,
+y-10,
+30,
+45
+);
+
+
+// ojos
+
+ctx.fillStyle="black";
+
+ctx.fillRect(x-7,y-28,4,4);
+ctx.fillRect(x+5,y-28,4,4);
+
+
+ctx.restore();
+
+
+
+}
+
+
+
+function dibujar(){
+
+
+ctx.fillStyle="#1f2937";
+
+ctx.fillRect(
+0,
+0,
+800,
+500
+);
+
+
+// zona
+
+ctx.fillStyle="#374151";
+
+ctx.fillRect(
+50,
+100,
+700,
+300
+);
+
+
+
+// personajes
+
+dibujarPersonaje(
+player.x,
+player.y,
+"nicolas"
+);
+
+
+dibujarPersonaje(
+npc.x,
+npc.y,
+"valeria"
+);
+
+
+// nombres
+
+
+ctx.fillStyle="white";
+
+ctx.fillText(
+"Nicolás",
+player.x-25,
+player.y+55
+);
+
+
+ctx.fillText(
+"Valeria",
+npc.x-25,
+npc.y+55
+);
+
+
+// barra
+
+ctx.fillText(
+"Empatía: "+empatia,
+650,
+30
+);
+
+
+
+// dialogo
+
+if(texto!=""){
+
+
+ctx.fillStyle="black";
+
+ctx.fillRect(
+30,
+350,
+740,
+120
+);
+
+
+ctx.strokeStyle="white";
+
+ctx.strokeRect(
+30,
+350,
+740,
+120
+);
+
+
+ctx.fillStyle="white";
+
+let lineas=texto.split("\n");
+
+
+lineas.forEach((l,i)=>{
+
+
+ctx.fillText(
+l,
+50,
+390+(i*25)
+);
+
+
+});
+
+
+}
+
+
+
+}
+
+
+
+function detectar(){
+
+
+let distancia=Math.sqrt(
+
+(player.x-npc.x)**2+
+(player.y-npc.y)**2
+
+);
+
+
+
+if(distancia<70 && escena=="inicio"){
+
+
+texto=
+"VALERIA:\n"+
+"Alguien publicó algo mío sin permiso.\n"+
+"Ahora todos se burlan.";
+
+escena="decidir";
+
+
+}
+
+
+
+}
+
+
+
+function finales(){
+
+
+if(escena=="bueno"){
+
+
+ctx.fillStyle="lime";
+
+ctx.fillText(
+"FINAL BUENO: Nicolás protege a la comunidad digital",
+80,
+180
+);
+
+
+boton.style.display="block";
+
+
+}
+
+
+
+if(escena=="malo"){
+
+
+ctx.fillStyle="red";
+
+
+ctx.fillText(
+"FINAL MALO: Nicolás pierde la confianza de todos",
+100,
+180
+);
+
+
+boton.style.display="block";
+
+
+}
+
+
+
+}
+
+
+
+function reiniciarJuego(){
+
+iniciar();
+
+}
+
+
+
+function loop(){
+
+
+mover();
+
+detectar();
+
+dibujar();
+
+finales();
+
+
+if(escena=="decidir"){
+
+
+ctx.fillStyle="yellow";
+
+ctx.fillText(
+"Presiona 1 = Ayudar | 2 = Ignorar",
+60,
+330
+);
+
+
+}
+
+
+
+requestAnimationFrame(loop);
+
+
+}
+
+
+
+iniciar();
+
+loop();
+
+
+</script>
+
+</body>
+</html>
