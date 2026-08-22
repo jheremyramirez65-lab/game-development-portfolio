@@ -1,16 +1,16 @@
-# 🎮 NOMBRE DEL VIDEOJUEGO
+# 🥗 ¡ALIMENTA AL SÚPER HÉROE!
 
 ## 📝 Descripción
 
-Este videojuego aborda el tema de ____________ mediante una experiencia interactiva.
+Este videojuego educativo está relacionado con la **alimentación saludable** mediante una experiencia interactiva, divertida y colorida.
 
 ## 🎯 Objetivo del jugador
 
-El objetivo principal del jugador es ____________.
+El objetivo principal del jugador es **seleccionar correctamente los alimentos saludables para alimentar al personaje y conseguir la mayor cantidad de puntos posible**.
 
 ## 🕹️ Mecánica principal
 
-La mecánica principal consiste en ____________.
+La mecánica principal consiste en **seleccionar alimentos saludables que aparecen en pantalla**, evitando aquellos que no sean recomendables. Las elecciones correctas permiten conseguir puntos y avanzar hacia el objetivo del juego.
 
 ## 🎲 Género
 
@@ -19,16 +19,15 @@ La mecánica principal consiste en ____________.
 
 ## ⌨️ Controles
 
-- `WASD` - Movimiento
-- `SPACE` - Acción / Saltar
 - `MOUSE` - Interacción
-- `CLICK` - Seleccionar
+- `CLICK` - Seleccionar alimentos
 
 ## 💻 Tecnologías utilizadas
 
 - HTML5
 - CSS3
 - JavaScript
+- IA generativa mediante prompts
 
 ## 📸 Capturas de pantalla
 
@@ -40,18 +39,22 @@ La mecánica principal consiste en ____________.
 
 ![Gameplay](capturas/gameplay.png)
 
+### Resultado final
+
+![Resultado final](capturas/resultado.png)
+
 ## 🤖 Uso de IA
 
-Se utilizó inteligencia artificial como apoyo en ____________.
+Se utilizó inteligencia artificial generativa mediante prompts para **apoyar la creación del prototipo y su estructura funcional**, aplicando los requisitos definidos para enseñar a elegir alimentos saludables.
 
 ## 📚 Lo que aprendí
 
-Durante el desarrollo aprendí ____________.
+Durante el desarrollo aprendí a **aplicar el concepto de mecánica de juego y género arcade a un objetivo educativo**, además de desarrollar una experiencia que utiliza interacción y retroalimentación para enseñar sobre alimentación saludable.
 
 ## 🔧 Mejoras futuras
 
-En una siguiente versión mejoraría ____________.
+En una siguiente versión mejoraría **la cantidad de niveles, la variedad de alimentos y la dificultad**, incorporando nuevos desafíos y más elementos de interacción.
 
 ## ▶️ Jugar
 
-[🎮 Abrir videojuego](NOMBRE.html)
+[🥗 Abrir videojuego](game3.html)
