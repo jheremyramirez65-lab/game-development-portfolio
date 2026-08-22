@@ -40,9 +40,14 @@ La mecánica principal consiste en **resolver preguntas de operaciones aritméti
 
 ![Gameplay](capturas/gameplay.png)
 
-### Resultado final
+### Gameplay adicional
 
-![Resultado final](capturas/resultado.png)
+![Gameplay adicional](capturas/gameplay2.png)
+
+## 🖥️ Plataforma
+
+- Navegador web (prototipo HTML)
+- Estado: **Prototipo funcional**
 
 ## 🤖 Uso de IA
 

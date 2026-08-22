@@ -48,6 +48,11 @@ La mecánica principal consiste en **interactuar con los residuos y tomar decisi
 
 ![Final malo](Capturas/finalMalo.png)
 
+## 🖥️ Plataforma
+
+- Navegador web (prototipo HTML)
+- Estado: **Prototipo funcional**
+
 ## 🤖 Uso de IA
 
 Se utilizó inteligencia artificial generativa mediante prompts para **apoyar la creación y desarrollo del prototipo**, incluyendo la generación del código y la construcción de la experiencia interactiva relacionada con el reciclaje.

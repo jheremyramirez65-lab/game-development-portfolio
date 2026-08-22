@@ -45,6 +45,11 @@ La mecánica principal consiste en **gestionar recursos y tomar decisiones finan
 
 ![Resultado](capturas/resultado.png)
 
+## 🖥️ Plataforma
+
+- Navegador web (prototipo HTML)
+- Estado: **Prototipo funcional**
+
 ## 🤖 Uso de IA
 
 Se utilizó inteligencia artificial generativa mediante prompts para **apoyar la creación del prototipo funcional**, utilizando como base el Game Design Document (GDD), sus mecánicas, reglas, progresión y condiciones de victoria y derrota.

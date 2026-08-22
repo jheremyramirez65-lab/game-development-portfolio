@@ -43,6 +43,11 @@ La mecánica principal consiste en **seleccionar alimentos saludables que aparec
 
 ![Resultado final](capturas/resultado.png)
 
+## 🖥️ Plataforma
+
+- Navegador web (prototipo HTML)
+- Estado: **Prototipo funcional**
+
 ## 🤖 Uso de IA
 
 Se utilizó inteligencia artificial generativa mediante prompts para **apoyar la creación del prototipo y su estructura funcional**, aplicando los requisitos definidos para enseñar a elegir alimentos saludables.

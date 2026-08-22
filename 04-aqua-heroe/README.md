@@ -44,6 +44,11 @@ La mecánica principal consiste en **tomar decisiones relacionadas con el uso de
 
 ![Resultado](capturas/resultado.png)
 
+## 🖥️ Plataforma
+
+- Navegador web (prototipo HTML)
+- Estado: **Prototipo funcional**
+
 ## 🤖 Uso de IA
 
 Se utilizó inteligencia artificial generativa mediante prompts para **apoyar el diseño y desarrollo del prototipo**, incluyendo la construcción de la estructura del videojuego y la implementación de sus elementos interactivos.

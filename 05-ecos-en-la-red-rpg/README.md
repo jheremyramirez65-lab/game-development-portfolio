@@ -46,6 +46,11 @@ La mecánica principal consiste en **avanzar mediante escenas y situaciones narr
 ![Escena narrativa](capturas/resultadofeliz.png)
 ![Escena narrativa](capturas/resultadomalo.png)
 
+## 🖥️ Plataforma
+
+- Navegador web (prototipo HTML)
+- Estado: **Prototipo funcional**
+
 ## 🤖 Uso de IA
 
 Se utilizó inteligencia artificial generativa mediante prompts para **apoyar la construcción del storytelling, la generación del prototipo y el desarrollo de los elementos narrativos del videojuego**.
