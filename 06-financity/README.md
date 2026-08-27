@@ -1,4 +1,4 @@
-# 💰 FINANCITY: DE CERO A LA LIBERTAD
+# 💰 FINANCITY: DE CERO A LA LIBERTAD &nbsp; [![Jugar](https://img.shields.io/badge/▶️_JUGAR-00A67E?style=for-the-badge)](game6.html)
 
 ## 📝 Descripción
 
@@ -61,7 +61,3 @@ Durante el desarrollo aprendí a **utilizar un Game Design Document como base pa
 ## 🔧 Mejoras futuras
 
 En una siguiente versión mejoraría **la variedad de decisiones financieras, la progresión, los eventos y los escenarios**, incorporando más situaciones de la vida cotidiana y nuevos desafíos económicos.
-
-## ▶️ Jugar
-
-[💰 Abrir videojuego](game6.html)
