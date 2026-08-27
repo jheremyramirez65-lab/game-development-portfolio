@@ -59,7 +59,3 @@ Durante el desarrollo aprendí a **aplicar el concepto de mecánica de juego y g
 ## 🔧 Mejoras futuras
 
 En una siguiente versión mejoraría **la cantidad de niveles, la variedad de alimentos y la dificultad**, incorporando nuevos desafíos y más elementos de interacción.
-
-## ▶️ Jugar
-
-[🥗 Abrir videojuego](game3.html)
