@@ -1,4 +1,4 @@
-# 🌐 ECOS EN LA RED RPG
+# 🌐 ECOS EN LA RED RPG &nbsp; [![Jugar](https://img.shields.io/badge/▶️_JUGAR-00A67E?style=for-the-badge)](game5.html)
 
 ## 📝 Descripción
 
@@ -62,7 +62,3 @@ Durante el desarrollo aprendí a **aplicar storytelling en videojuegos, construi
 ## 🔧 Mejoras futuras
 
 En una siguiente versión mejoraría **la cantidad de escenas, la profundidad de las decisiones del jugador y la interacción narrativa**, incorporando más situaciones y diferentes consecuencias.
-
-## ▶️ Jugar
-
-[🌐 Abrir videojuego](game5.html)
