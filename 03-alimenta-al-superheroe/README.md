@@ -1,4 +1,4 @@
-# 🥗 ¡ALIMENTA AL SÚPER HÉROE!
+# 🥗 ¡ALIMENTA AL SÚPER HÉROE! &nbsp; [![Jugar](https://img.shields.io/badge/▶️_JUGAR-00A67E?style=for-the-badge)](game3.html)
 
 ## 📝 Descripción
 
