@@ -1,4 +1,4 @@
-# 🎮 CALCULANDIA
+# 🎮 CALCULANDIA &nbsp; [![Jugar](https://img.shields.io/badge/▶️_JUGAR-00A67E?style=for-the-badge)](calculandia.html)
 
 ## 📝 Descripción
 
@@ -60,7 +60,3 @@ Durante el desarrollo aprendí a **transformar los requisitos de un videojuego e
 ## 🔧 Mejoras futuras
 
 En una siguiente versión mejoraría **la complejidad de las preguntas**, incorporando desafíos más variados y aumentando progresivamente la dificultad para que el juego resulte más interesante y educativo para los estudiantes.
-
-## ▶️ Jugar
-
-[🎮 Abrir videojuego](calculandia.html)
