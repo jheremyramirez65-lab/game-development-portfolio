@@ -25,76 +25,60 @@ Mi objetivo con este portafolio es demostrar no solamente el resultado final, si
 
 <table>
 <tr>
-  <td><b>01 · 🧮 Calculandia</b><br/>Trivia / Arcade educativo<br/>Operaciones matemáticas</td>
+  <td width="220"><img src="01-calculandia/capturas/inicio.png" width="200"/></td>
   <td>
-    <a href="01-calculandia/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a><br/>
+    <b>01 · 🧮 Calculandia</b><br/>
+    Trivia / Arcade educativo · Operaciones matemáticas<br/><br/>
+    <a href="01-calculandia/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a>
     <a href="01-calculandia/calculandia.html"><img src="https://img.shields.io/badge/▶️_Jugar-00A67E?style=for-the-badge" /></a>
   </td>
 </tr>
 <tr>
-  <td><b>02 · ♻️ Recycle & Launch</b><br/>Arcade / Aventura educativa<br/>Reciclaje</td>
+  <td width="220"><img src="02-recycle-and-launch/Capturas/gameplay.png" width="200"/></td>
   <td>
-    <a href="02-recycle-and-launch/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a><br/>
+    <b>02 · ♻️ Recycle & Launch</b><br/>
+    Arcade / Aventura educativa · Reciclaje<br/><br/>
+    <a href="02-recycle-and-launch/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a>
     <a href="02-recycle-and-launch/RecicleLaunch.html"><img src="https://img.shields.io/badge/▶️_Jugar-00A67E?style=for-the-badge" /></a>
   </td>
 </tr>
 <tr>
-  <td><b>03 · 🥗 ¡Alimenta al Súper Héroe!</b><br/>Arcade educativo<br/>Alimentación saludable</td>
+  <td width="220"><img src="03-alimenta-al-superheroe/capturas/gameplay.png" width="200"/></td>
   <td>
-    <a href="03-alimenta-al-superheroe/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a><br/>
+    <b>03 · 🥗 ¡Alimenta al Súper Héroe!</b><br/>
+    Arcade educativo · Alimentación saludable<br/><br/>
+    <a href="03-alimenta-al-superheroe/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a>
     <a href="03-alimenta-al-superheroe/game3.html"><img src="https://img.shields.io/badge/▶️_Jugar-00A67E?style=for-the-badge" /></a>
   </td>
 </tr>
 <tr>
-  <td><b>04 · 💧 Misión Gota: Reto por el Agua</b><br/>Simulación / Estrategia<br/>Ahorro de agua</td>
+  <td width="220"><img src="04-aqua-heroe/capturas/gameplay.png" width="200"/></td>
   <td>
-    <a href="04-aqua-heroe/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a><br/>
+    <b>04 · 💧 Misión Gota: Reto por el Agua</b><br/>
+    Simulación / Estrategia · Ahorro de agua<br/><br/>
+    <a href="04-aqua-heroe/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a>
     <a href="04-aqua-heroe/game4.html"><img src="https://img.shields.io/badge/▶️_Jugar-00A67E?style=for-the-badge" /></a>
   </td>
 </tr>
 <tr>
-  <td><b>05 · 🌐 Ecos en la Red RPG</b><br/>RPG / Narrativa<br/>Ciberbullying y decisiones</td>
+  <td width="220"><img src="05-ecos-en-la-red-rpg/capturas/gameplay.png" width="200"/></td>
   <td>
-    <a href="05-ecos-en-la-red-rpg/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a><br/>
+    <b>05 · 🌐 Ecos en la Red RPG</b><br/>
+    RPG / Narrativa · Ciberbullying y decisiones<br/><br/>
+    <a href="05-ecos-en-la-red-rpg/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a>
     <a href="05-ecos-en-la-red-rpg/game5.html"><img src="https://img.shields.io/badge/▶️_Jugar-00A67E?style=for-the-badge" /></a>
   </td>
 </tr>
 <tr>
-  <td><b>06 · 💰 Financity: De Cero a la Libertad</b><br/>Simulación / Tycoon<br/>Educación financiera</td>
+  <td width="220"><img src="06-financity/capturas/gameplay.png" width="200"/></td>
   <td>
-    <a href="06-financity/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a><br/>
+    <b>06 · 💰 Financity: De Cero a la Libertad</b><br/>
+    Simulación / Tycoon · Educación financiera<br/><br/>
+    <a href="06-financity/"><img src="https://img.shields.io/badge/📄_Proyecto-6f42c1?style=for-the-badge" /></a>
     <a href="06-financity/game6.html"><img src="https://img.shields.io/badge/▶️_Jugar-00A67E?style=for-the-badge" /></a>
   </td>
 </tr>
 </table>
-
----
-
-## 🖼️ Galería
-
-### 🧮 Calculandia
-![Calculandia](01-calculandia/capturas/inicio.png)
-<a href="01-calculandia/calculandia.html"><img src="https://img.shields.io/badge/▶️_JUGAR_AHORA-00A67E?style=for-the-badge" /></a>
-
-### ♻️ Recycle & Launch
-![Recycle & Launch](02-recycle-and-launch/Capturas/gameplay.png)
-<a href="02-recycle-and-launch/RecicleLaunch.html"><img src="https://img.shields.io/badge/▶️_JUGAR_AHORA-00A67E?style=for-the-badge" /></a>
-
-### 🥗 ¡Alimenta al Súper Héroe!
-![Alimenta al Súper Héroe](03-alimenta-al-superheroe/capturas/gameplay.png)
-<a href="03-alimenta-al-superheroe/game3.html"><img src="https://img.shields.io/badge/▶️_JUGAR_AHORA-00A67E?style=for-the-badge" /></a>
-
-### 💧 Misión Gota
-![Misión Gota](04-aqua-heroe/capturas/gameplay.png)
-<a href="04-aqua-heroe/game4.html"><img src="https://img.shields.io/badge/▶️_JUGAR_AHORA-00A67E?style=for-the-badge" /></a>
-
-### 🌐 Ecos en la Red RPG
-![Ecos en la Red RPG](05-ecos-en-la-red-rpg/capturas/gameplay.png)
-<a href="05-ecos-en-la-red-rpg/game5.html"><img src="https://img.shields.io/badge/▶️_JUGAR_AHORA-00A67E?style=for-the-badge" /></a>
-
-### 💰 Financity
-![Financity](06-financity/capturas/gameplay.png)
-<a href="06-financity/game6.html"><img src="https://img.shields.io/badge/▶️_JUGAR_AHORA-00A67E?style=for-the-badge" /></a>
 
 ---
 
