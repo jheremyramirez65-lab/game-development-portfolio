@@ -60,7 +60,3 @@ Durante el desarrollo aprendí a **utilizar el concepto de Player Persona para o
 ## 🔧 Mejoras futuras
 
 En una siguiente versión mejoraría **la cantidad de retos, el sistema de recompensas y la progresión**, incorporando más situaciones relacionadas con el ahorro de agua y nuevos niveles de dificultad.
-
-## ▶️ Jugar
-
-[💧 Abrir videojuego](game4.html)
