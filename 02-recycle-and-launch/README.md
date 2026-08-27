@@ -1,4 +1,4 @@
-# ♻️ RECYCLE & LAUNCH
+# ♻️ RECYCLE & LAUNCH &nbsp; [![Jugar](https://img.shields.io/badge/▶️_JUGAR-00A67E?style=for-the-badge)](RecicleLaunch.html)
 
 ## 📝 Descripción
 
